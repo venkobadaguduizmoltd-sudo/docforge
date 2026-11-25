@@ -27,13 +27,18 @@ def list_users(
 def get_settings_placeholder(
     _admin: User = Depends(require_role(RoleName.ADMIN)),
 ) -> AdminSettingsOut:
+    from app.ai.store import get_policy, seed_default_providers
+
+    seed_default_providers()
+    policy = get_policy()
     return AdminSettingsOut(
         retention_days=90,
         feature_flags={
             "suggestion_mode": True,
             "section_locks": True,
-            "paid_providers": False,
+            "paid_providers": policy.allow_paid_providers,
             "template_studio": False,
+            "ai_providers": True,
         },
-        note="Retention and feature flags are placeholders until Settings ships in a later phase.",
+        note="Retention placeholders remain; AI provider routing/budgets live under /admin/providers.",
     )

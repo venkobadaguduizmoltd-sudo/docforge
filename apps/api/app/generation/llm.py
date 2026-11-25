@@ -133,10 +133,22 @@ def _parse_json_content(content: str) -> dict[str, Any]:
 def get_llm_client() -> LLMClient:
     settings = get_settings()
     provider = settings.llm_provider.lower()
+    # Prefer Phase 3 DocGenProvider bridge (routing + store) except explicit legacy mock.
     if provider in {"mock", "fixture", "test"}:
-        return MockLLMClient()
-    return OpenAICompatibleClient(
-        base_url=settings.ollama_base_url,
-        model=settings.llm_model,
-        api_key=settings.llm_api_key,
-    )
+        try:
+            from app.ai.bridge import ProviderLLMClient
+            from app.ai.adapters.mock import MockProvider
+
+            return ProviderLLMClient(MockProvider(), use_routing=False)  # type: ignore[return-value]
+        except Exception:  # noqa: BLE001
+            return MockLLMClient()
+    try:
+        from app.ai.bridge import get_provider_llm_client
+
+        return get_provider_llm_client()  # type: ignore[return-value]
+    except Exception:  # noqa: BLE001
+        return OpenAICompatibleClient(
+            base_url=settings.ollama_base_url,
+            model=settings.llm_model,
+            api_key=settings.llm_api_key,
+        )

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
-from app.api import admin, auth, documents, health, jobs, repos, templates
+from app.api import admin, auth, documents, health, jobs, providers_admin, repos, templates
 from app.core.config import get_settings
 from app.core.database import SessionLocal
 from app.core.security import hash_password
@@ -50,7 +50,7 @@ async def lifespan(_app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    application = FastAPI(title=settings.app_name, version="0.3.0", lifespan=lifespan)
+    application = FastAPI(title=settings.app_name, version="0.4.0", lifespan=lifespan)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
@@ -65,6 +65,7 @@ def create_app() -> FastAPI:
     application.include_router(jobs.router)
     application.include_router(documents.router)
     application.include_router(admin.router)
+    application.include_router(providers_admin.router)
     return application
 
 
