@@ -33,7 +33,8 @@ export function LoginPage() {
             <span className="text-muted">Email</span>
             <input
               className="w-full rounded-md border border-border bg-surface px-3 py-2 outline-none ring-accent focus:ring-2"
-              type="email"
+              type="text"
+              inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
