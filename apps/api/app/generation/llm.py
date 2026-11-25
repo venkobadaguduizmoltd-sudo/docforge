@@ -136,8 +136,8 @@ def get_llm_client() -> LLMClient:
     # Prefer Phase 3 DocGenProvider bridge (routing + store) except explicit legacy mock.
     if provider in {"mock", "fixture", "test"}:
         try:
-            from app.ai.bridge import ProviderLLMClient
             from app.ai.adapters.mock import MockProvider
+            from app.ai.bridge import ProviderLLMClient
 
             return ProviderLLMClient(MockProvider(), use_routing=False)  # type: ignore[return-value]
         except Exception:  # noqa: BLE001
