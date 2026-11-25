@@ -2,6 +2,11 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { useAuth } from "@/hooks/useAuth";
 import {
   acceptSuggestion,
   editSection,
@@ -18,8 +23,6 @@ import {
   type DocumentSection,
 } from "@/lib/api";
 
-const TOKEN_KEY = "docforge-token";
-
 function sectionSummary(section: DocumentSection): string {
   const summary = section.content_json.summary;
   return typeof summary === "string" ? summary : "";
@@ -32,7 +35,7 @@ function sectionBullets(section: DocumentSection): string[] {
 
 export function DocumentPage() {
   const { documentId = "" } = useParams();
-  const token = typeof window !== "undefined" ? window.localStorage.getItem(TOKEN_KEY) : null;
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
@@ -77,73 +80,74 @@ export function DocumentPage() {
 
   if (!token) {
     return (
-      <AppShell title="DocForge">
-        <p className="text-muted">
-          Sign in first. <Link to="/login">Login</Link>
-        </p>
+      <AppShell>
+        <EmptyState
+          title="Sign in required"
+          description="Open the document workspace after authenticating."
+          action={
+            <Link to="/login" className="df-btn-primary">
+              Login
+            </Link>
+          }
+        />
       </AppShell>
     );
   }
 
   return (
-    <AppShell title="DocForge">
+    <AppShell wide>
       <section className="space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-wider text-muted">
-              <Link to="/generate" className="underline">
-                Generate
-              </Link>{" "}
-              / document
-            </p>
-            <h2 className="text-3xl font-semibold tracking-tight">{doc?.title ?? "Loading…"}</h2>
-            {doc ? (
-              <p className="mt-2 text-sm text-muted">
-                Rev {doc.current_revision} · pinned {(doc.pinned_commit_sha ?? "").slice(0, 8)} ·{" "}
-                {doc.template_slug}
-              </p>
-            ) : null}
-          </div>
-          {doc ? (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="rounded-md border border-border px-3 py-2 text-sm"
-                disabled={run.isPending}
-                onClick={() =>
-                  run.mutate(() => regenerateAllUnlocked(token, doc.id, prompt || undefined))
-                }
-              >
-                Regen unlocked
-              </button>
-              <button
-                type="button"
-                className="rounded-md border border-border px-3 py-2 text-sm"
-                disabled={run.isPending}
-                onClick={() => run.mutate(() => undoDocument(token, doc.id))}
-              >
-                Undo
-              </button>
-            </div>
-          ) : null}
-        </div>
+        <PageHeader
+          kicker="Document workspace"
+          title={doc?.title ?? (docQuery.isLoading ? "Loading…" : "Document")}
+          description={
+            doc
+              ? `Rev ${doc.current_revision} · pinned ${(doc.pinned_commit_sha ?? "").slice(0, 8) || "—"} · ${doc.template_slug}`
+              : "Section regen, suggestions, locks, and versions."
+          }
+          actions={
+            doc ? (
+              <>
+                <button
+                  type="button"
+                  className="df-btn-secondary"
+                  disabled={run.isPending}
+                  onClick={() =>
+                    run.mutate(() => regenerateAllUnlocked(token, doc.id, prompt || undefined))
+                  }
+                >
+                  Regen unlocked
+                </button>
+                <button
+                  type="button"
+                  className="df-btn-secondary"
+                  disabled={run.isPending}
+                  onClick={() => run.mutate(() => undoDocument(token, doc.id))}
+                >
+                  Undo
+                </button>
+              </>
+            ) : undefined
+          }
+        />
 
+        {docQuery.isLoading ? <LoadingState label="Loading document…" rows={5} /> : null}
         {docQuery.isError ? (
-          <p className="text-sm text-red-600">{(docQuery.error as Error).message}</p>
+          <EmptyState title="Could not load document" description={(docQuery.error as Error).message} />
         ) : null}
 
         {doc ? (
-          <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
+          <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
             <aside className="space-y-2">
               {doc.sections.map((section) => (
                 <button
                   key={section.section_id}
                   type="button"
                   onClick={() => selectSection(section)}
-                  className={`block w-full rounded-md border px-3 py-2 text-left text-sm ${
+                  className={`block w-full rounded-md border px-3 py-2.5 text-left text-sm transition ${
                     active?.section_id === section.section_id
-                      ? "border-accent bg-surface"
-                      : "border-border bg-surface/40"
+                      ? "border-accent bg-accent-soft"
+                      : "border-border bg-surface/70 hover:border-accent/40"
                   }`}
                 >
                   <span className="font-medium">{section.section_id}</span>
@@ -158,11 +162,11 @@ export function DocumentPage() {
             </aside>
 
             {active ? (
-              <div className="space-y-4 rounded-lg border border-border bg-surface/70 p-4">
+              <div className="df-panel space-y-4 p-5 animate-fade-in">
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    className="rounded-md border border-border px-3 py-1.5 text-sm"
+                    className="df-btn-secondary"
                     disabled={run.isPending || active.is_locked}
                     onClick={() =>
                       run.mutate(() =>
@@ -174,7 +178,7 @@ export function DocumentPage() {
                   </button>
                   <button
                     type="button"
-                    className="rounded-md border border-border px-3 py-1.5 text-sm"
+                    className="df-btn-secondary"
                     disabled={run.isPending || active.is_locked}
                     onClick={() =>
                       run.mutate(() =>
@@ -187,7 +191,7 @@ export function DocumentPage() {
                   {active.is_locked ? (
                     <button
                       type="button"
-                      className="rounded-md border border-border px-3 py-1.5 text-sm"
+                      className="df-btn-secondary"
                       disabled={run.isPending}
                       onClick={() => run.mutate(() => unlockSection(token, doc.id, active.section_id))}
                     >
@@ -196,39 +200,40 @@ export function DocumentPage() {
                   ) : (
                     <button
                       type="button"
-                      className="rounded-md border border-border px-3 py-1.5 text-sm"
+                      className="df-btn-secondary"
                       disabled={run.isPending}
                       onClick={() => run.mutate(() => lockSection(token, doc.id, active.section_id))}
                     >
                       Lock
                     </button>
                   )}
+                  {active.is_locked ? <StatusPill label="locked" tone="warning" /> : null}
                 </div>
 
-                <label className="block space-y-1 text-sm">
+                <label className="block space-y-1.5 text-sm">
                   <span className="text-muted">Follow-up / suggestion prompt</span>
                   <input
-                    className="w-full rounded-md border border-border bg-canvas px-3 py-2"
+                    className="df-input"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="Optional instruction for AI"
                   />
                 </label>
 
-                <label className="block space-y-1 text-sm">
+                <label className="block space-y-1.5 text-sm">
                   <span className="text-muted">Summary</span>
                   <textarea
-                    className="min-h-28 w-full rounded-md border border-border bg-canvas px-3 py-2"
+                    className="df-input min-h-28"
                     value={draftSummary || sectionSummary(active)}
                     onChange={(e) => setDraftSummary(e.target.value)}
                     disabled={active.is_locked}
                   />
                 </label>
 
-                <label className="block space-y-1 text-sm">
+                <label className="block space-y-1.5 text-sm">
                   <span className="text-muted">Bullets (one per line)</span>
                   <textarea
-                    className="min-h-24 w-full rounded-md border border-border bg-canvas px-3 py-2"
+                    className="df-input min-h-24"
                     value={draftBullets || sectionBullets(active).join("\n")}
                     onChange={(e) => setDraftBullets(e.target.value)}
                     disabled={active.is_locked}
@@ -237,7 +242,7 @@ export function DocumentPage() {
 
                 <button
                   type="button"
-                  className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white dark:text-canvas"
+                  className="df-btn-primary"
                   disabled={run.isPending || active.is_locked}
                   onClick={() =>
                     run.mutate(() =>
@@ -256,15 +261,15 @@ export function DocumentPage() {
                 </button>
 
                 {active.pending_suggestion ? (
-                  <div className="space-y-2 rounded-md border border-accent/40 bg-canvas p-3">
+                  <div className="space-y-2 rounded-md border border-accent/35 bg-accent-soft/40 p-3">
                     <p className="text-sm font-medium">Pending suggestion</p>
-                    <pre className="max-h-40 overflow-auto text-xs text-muted">
+                    <pre className="max-h-40 overflow-auto font-mono text-xs text-muted">
                       {JSON.stringify(active.pending_suggestion.proposed, null, 2)}
                     </pre>
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        className="rounded-md bg-accent px-3 py-1.5 text-sm text-white dark:text-canvas"
+                        className="df-btn-primary"
                         onClick={() =>
                           run.mutate(() => acceptSuggestion(token, doc.id, active.section_id))
                         }
@@ -273,7 +278,7 @@ export function DocumentPage() {
                       </button>
                       <button
                         type="button"
-                        className="rounded-md border border-border px-3 py-1.5 text-sm"
+                        className="df-btn-secondary"
                         onClick={() =>
                           run.mutate(() => rejectSuggestion(token, doc.id, active.section_id))
                         }
@@ -304,16 +309,16 @@ export function DocumentPage() {
         ) : null}
 
         {versionsQuery.data?.length ? (
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium">Versions</h3>
-            <ul className="space-y-1 text-sm">
+          <div className="df-panel space-y-3 p-5">
+            <h3 className="font-display text-lg font-semibold">Versions</h3>
+            <ul className="space-y-2 text-sm">
               {[...versionsQuery.data].reverse().map((rev) => (
-                <li key={rev.revision_number} className="flex items-center gap-3 text-muted">
+                <li key={rev.revision_number} className="flex flex-wrap items-center gap-3 text-muted">
                   <span className="font-mono">r{rev.revision_number}</span>
                   <span>{rev.note ?? "—"}</span>
                   <button
                     type="button"
-                    className="underline"
+                    className="font-medium text-accent underline-offset-2 hover:underline"
                     disabled={run.isPending || !doc}
                     onClick={() =>
                       doc && run.mutate(() => restoreVersion(token, doc.id, rev.revision_number))
@@ -327,7 +332,7 @@ export function DocumentPage() {
           </div>
         ) : null}
 
-        {run.isError ? <p className="text-sm text-red-600">{(run.error as Error).message}</p> : null}
+        {run.isError ? <p className="text-sm text-danger">{(run.error as Error).message}</p> : null}
       </section>
     </AppShell>
   );
