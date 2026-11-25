@@ -39,6 +39,10 @@ Policy: only free / OSI-approved / self-hostable dependencies for the core platf
 | Cache | redis:7-alpine | BSD-3-Clause (Redis) |
 | Object storage | MinIO | AGPL-3.0 (self-hostable; optional S3 swap later) |
 | Optional LLM | Ollama | MIT |
+| HTML templates | Jinja2 | BSD-3-Clause |
+| DOCX | python-docx | MIT |
+| PDF | ReportLab | BSD-3-Clause |
+| Symbols | tree-sitter, tree-sitter-python | MIT |
 
 ## MinIO note
 

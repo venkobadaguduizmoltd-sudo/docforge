@@ -61,3 +61,37 @@ Recorded defaults for the foundation scaffold. Change only with an explicit foll
 ## AD-010 — Secrets
 
 **Decision:** No hard-coded production secrets. `.env.example` documents required variables; Compose reads `.env`. Bootstrap admin credentials are env-driven for local/dev only.
+
+## AD-011 — Job progress: SSE over WebSocket
+
+**Decision:** Phase 1 streams job progress with Server-Sent Events (`GET /jobs/{id}/events`) backed by an in-process event history plus optional Redis pub/sub.
+
+**Why:** SSE is simpler for one-way progress, works with FastAPI `StreamingResponse`, and needs no WS protocol negotiation. EventSource cannot set `Authorization`, so Phase 1 also accepts `access_token` query for SSE/preview (tighten later).
+
+## AD-012 — Rendering stack
+
+**Decision:** HTML via Jinja2 theme templates; DOCX via `python-docx`; PDF via ReportLab. All three consume the same validated section content + immutable template spec (checksum verified at render).
+
+**Why:** Avoids HTML→PDF system library chains (WeasyPrint/Cairo) in the MVP container while keeping OSI licenses.
+
+## AD-013 — Repo providers
+
+**Decision:** `RepoProvider` interface with `github`, `gitlab`, and `fixture` adapters. CI and default local runs use `fixture` (copies `apps/api/tests/fixtures/sample_repo`). Live providers use tokens from env/request.
+
+**Why:** Keeps the generation path testable without network; GitHub/GitLab share the same clone/pin contract (ref → SHA, shallow clone, pin on job).
+
+## AD-014 — LLM default for Phase 1
+
+**Decision:** OpenAI-compatible HTTP client targeting Ollama (`OLLAMA_BASE_URL` + `/v1/chat/completions`). `LLM_PROVIDER=mock` is the default in `.env.example` for offline/CI; set `openai_compatible` when Ollama is up.
+
+**Why:** Matches AD-005; mock keeps MVP tests deterministic without a GPU/model pull.
+
+## AD-015 — Analyzer / tree-sitter
+
+**Decision:** Always build file tree + language counts. Symbol extraction uses `tree-sitter` + `tree-sitter-python` when available; JavaScript/TypeScript and fallbacks use regex extractors.
+
+**Why:** Practical Phase 1 coverage without shipping every grammar wheel.
+
+## AD-016 — Prompt injection + secret egress
+
+**Decision:** Redact common secrets before analysis excerpts leave the sandbox. Wrap untrusted repo blobs in `<<<DOCForge_REPO_DATA_BEGIN/END>>>` delimiters with an explicit system guard that ignores instructions inside the block.

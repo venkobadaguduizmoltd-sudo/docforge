@@ -2,7 +2,7 @@
 
 AI documentation platform: generate professional docs from Git repositories into admin-defined **immutable templates**, with live preview and section-level corrections.
 
-> Phase 0 — Foundation scaffold only. See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
+> Phase 1 — MVP generation slice. See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Core principle
 
@@ -16,7 +16,8 @@ Templates (structure + rendering assets) are **immutable per version** (SHA-256)
 | API | Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic v2 |
 | Worker | Arq + Redis |
 | Data | PostgreSQL 16 + pgvector, MinIO |
-| Optional AI | Ollama (Compose profile) |
+| Optional AI | Ollama (Compose profile); `LLM_PROVIDER=mock` offline |
+| Render | Jinja2 HTML, python-docx, ReportLab PDF |
 
 ## Quick start (Docker Compose)
 
@@ -45,6 +46,21 @@ docker compose --profile ollama up --build
 **Local embeddings:** with the `ollama` profile running, pull an embedding model (for example `ollama pull nomic-embed-text`). Phase 0 does not invoke embeddings; later phases use `OLLAMA_BASE_URL` / `EMBEDDINGS_PROVIDER=local`.
 
 Default bootstrap admin (from `.env.example`): `admin@localhost` / `admin_change_me`.
+
+### Phase 1 MVP flow
+
+1. Sign in at http://localhost:5173/login  
+2. Open **Generate** (`/generate`) and run with provider `fixture` (no tokens needed).  
+3. Watch job status / SSE stages; open HTML preview; download DOCX/PDF from `/jobs/{id}/artifacts/{kind}`.  
+4. For live GitHub/GitLab: set `GITHUB_TOKEN` / `GITLAB_TOKEN`, choose provider, pass `full_name` + `ref`.  
+5. For real LLM output: `docker compose --profile ollama up`, set `LLM_PROVIDER=openai_compatible`, pull a chat model.
+
+Offline pipeline test:
+
+```bash
+cd apps/api && pip install -r requirements.txt
+LLM_PROVIDER=mock pytest -q
+```
 
 ### Windows 11 / WSL2
 

@@ -52,6 +52,11 @@ ALLOWED: dict[str, str] = {
     "@types/react-dom": "MIT",
     "@types/node": "MIT",
     "@eslint/js": "MIT",
+    "jinja2": "BSD-3-Clause",
+    "python-docx": "MIT",
+    "reportlab": "BSD-3-Clause",
+    "tree-sitter": "MIT",
+    "tree-sitter-python": "MIT",
 }
 
 # Simulated commercial-only / non-OSI markers that must never appear

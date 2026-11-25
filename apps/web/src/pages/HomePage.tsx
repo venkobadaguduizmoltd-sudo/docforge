@@ -27,7 +27,7 @@ export function HomePage() {
         <div>
           <h2 className="text-3xl font-semibold tracking-tight">Workspace</h2>
           <p className="mt-2 max-w-xl text-muted">
-            Phase 0 foundation shell. Templates stay immutable; AI fills section content only.
+            Phase 1 MVP: generate docs from GitHub/GitLab/fixture repos into an immutable template.
           </p>
         </div>
         <dl className="grid gap-4 sm:grid-cols-2">
@@ -44,11 +44,17 @@ export function HomePage() {
             </dd>
           </div>
         </dl>
-        {!token ? (
-          <Link to="/login" className="inline-flex rounded-md bg-accent px-4 py-2.5 font-medium text-white dark:text-canvas">
-            Go to login
-          </Link>
-        ) : null}
+        <div className="flex flex-wrap gap-3">
+          {!token ? (
+            <Link to="/login" className="inline-flex rounded-md bg-accent px-4 py-2.5 font-medium text-white dark:text-canvas">
+              Go to login
+            </Link>
+          ) : (
+            <Link to="/generate" className="inline-flex rounded-md bg-accent px-4 py-2.5 font-medium text-white dark:text-canvas">
+              Generate document
+            </Link>
+          )}
+        </div>
       </section>
     </AppShell>
   );

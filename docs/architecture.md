@@ -1,25 +1,25 @@
-# DocForge Architecture (Phase 0 pointer)
+# DocForge Architecture (Phase 1)
 
 ```
-┌─────────┐     JWT      ┌─────────┐     SQL      ┌──────────────────┐
-│  web    │ ───────────► │   api   │ ──────────► │ Postgres 16+vec  │
-│ Vite/React             │ FastAPI │             └──────────────────┘
-└─────────┘              └────┬────┘
-                              │ enqueue
-                              ▼
-                         ┌─────────┐     Redis    ┌───────┐
-                         │ worker  │ ◄─────────── │ redis │
-                         │  Arq    │              └───────┘
-                         └────┬────┘
-                              │ objects
-                              ▼
-                         ┌─────────┐
-                         │  MinIO  │
+┌─────────┐   JWT/SSE    ┌─────────┐  clone/pin   ┌──────────────────┐
+│  web    │ ───────────► │   api   │ ───────────► │ GitHub / GitLab  │
+│ Vite    │              │ FastAPI │              │ or fixture repo  │
+└─────────┘              └────┬────┘              └────────┬─────────┘
+                              │ enqueue / inline           │ sandbox
+                              ▼                            ▼
+                         ┌─────────┐                 analyze+redact
+                         │ worker  │                      │
+                         │  Arq    │ ◄── Redis ──► progress SSE
+                         └────┬────┘                      │
+                              │                    generate sections
+                              │                    (Ollama or mock)
+                              │                           │
+                              ▼                           ▼
+                         ┌─────────┐              render HTML/DOCX/PDF
+                         │  MinIO  │              (checksum-sealed template)
                          └─────────┘
-
-Optional: Ollama (--profile ollama) for local OpenAI-compatible inference.
 ```
 
-**Invariant:** Templates are immutable per version (SHA-256). Content JSON is keyed by section id and merged at render time.
+**Invariant:** Templates are immutable per version (SHA-256). Content JSON is keyed by `section_id` only and merged at render time. Repo data is secret-scanned and wrapped in delimited prompt blocks.
 
-See `docs/DECISIONS.md` for defaults and `docs/LICENSES.md` for licensing policy.
+See `docs/DECISIONS.md` and `docs/LICENSES.md`.
