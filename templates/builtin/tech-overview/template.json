@@ -1,0 +1,28 @@
+{
+  "id": "builtin.tech-overview",
+  "name": "Technical Overview",
+  "slug": "tech-overview",
+  "description": "Built-in Phase 1 template: overview, architecture, and key modules.",
+  "theme": {
+    "html": "theme/document.html.j2",
+    "css": "theme/styles.css",
+    "docx": "theme/docx-styles.json"
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "description": "Product purpose and high-level summary."
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "description": "Structural layout of the repository and runtime components."
+    },
+    {
+      "id": "key_modules",
+      "title": "Key Modules",
+      "description": "Important packages, symbols, and entry points."
+    }
+  ]
+}
