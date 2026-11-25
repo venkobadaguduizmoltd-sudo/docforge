@@ -1,7 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
-import { fetchJob, jobEventsUrl, startGenerateJob, type Job } from "@/lib/api";
+import {
+  fetchJob,
+  jobEventsUrl,
+  materializeDocument,
+  startGenerateJob,
+  type DocForgeDocument,
+  type Job,
+} from "@/lib/api";
 
 const TOKEN_KEY = "docforge-token";
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
@@ -13,6 +21,7 @@ export function GeneratePage() {
   const [ref, setRef] = useState("main");
   const [jobId, setJobId] = useState<string | null>(null);
   const [events, setEvents] = useState<string[]>([]);
+  const [documentId, setDocumentId] = useState<string | null>(null);
 
   const jobQuery = useQuery({
     queryKey: ["job", jobId],
@@ -34,6 +43,7 @@ export function GeneratePage() {
       }),
     onSuccess: (job: Job) => {
       setJobId(job.id);
+      setDocumentId(null);
       setEvents([]);
       if (!token) return;
       const source = new EventSource(jobEventsUrl(job.id, token));
@@ -52,6 +62,11 @@ export function GeneratePage() {
     },
   });
 
+  const openDoc = useMutation({
+    mutationFn: () => materializeDocument(token!, jobId!),
+    onSuccess: (doc: DocForgeDocument) => setDocumentId(doc.id),
+  });
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     mutation.mutate();
@@ -65,8 +80,8 @@ export function GeneratePage() {
         <div>
           <h2 className="text-3xl font-semibold tracking-tight">Generate</h2>
           <p className="mt-2 max-w-xl text-muted">
-            Phase 1 MVP: clone a repo (fixture/GitHub/GitLab), analyze, generate section content, render
-            HTML/DOCX/PDF.
+            Generate from a repo, then open the document editor for section regen, suggestions, locks,
+            and versions (Phase 2).
           </p>
         </div>
         {!token ? (
@@ -116,16 +131,38 @@ export function GeneratePage() {
             <p className="text-lg font-medium">Status: {job.status}</p>
             {job.commit_sha ? <p className="text-sm text-muted">Pinned SHA: {job.commit_sha}</p> : null}
             {job.status === "completed" && token ? (
-              <p className="text-sm">
-                <a
-                  className="text-accent underline"
-                  href={`${API_URL}/jobs/${job.id}/preview?access_token=${encodeURIComponent(token)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open HTML preview
-                </a>
-              </p>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <a
+                    className="text-accent underline"
+                    href={`${API_URL}/jobs/${job.id}/preview?access_token=${encodeURIComponent(token)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open HTML preview
+                  </a>
+                </p>
+                <p>
+                  <button
+                    type="button"
+                    className="rounded-md border border-border px-3 py-1.5"
+                    disabled={openDoc.isPending}
+                    onClick={() => openDoc.mutate()}
+                  >
+                    {openDoc.isPending ? "Opening…" : "Open in document editor"}
+                  </button>
+                </p>
+                {documentId ? (
+                  <p>
+                    <Link className="text-accent underline" to={`/documents/${documentId}`}>
+                      Edit sections / versions
+                    </Link>
+                  </p>
+                ) : null}
+                {openDoc.isError ? (
+                  <p className="text-red-600">{(openDoc.error as Error).message}</p>
+                ) : null}
+              </div>
             ) : null}
             {job.error ? <p className="text-sm text-red-600">{job.error}</p> : null}
             {events.length ? (

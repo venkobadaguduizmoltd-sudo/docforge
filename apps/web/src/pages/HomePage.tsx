@@ -27,7 +27,8 @@ export function HomePage() {
         <div>
           <h2 className="text-3xl font-semibold tracking-tight">Workspace</h2>
           <p className="mt-2 max-w-xl text-muted">
-            Phase 1 MVP: generate docs from GitHub/GitLab/fixture repos into an immutable template.
+            Generate docs from repos into immutable templates, then correct sections with regen,
+            suggestions, locks, and versions.
           </p>
         </div>
         <dl className="grid gap-4 sm:grid-cols-2">
