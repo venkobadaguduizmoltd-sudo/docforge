@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-canvas: 244 246 241;
+  --color-surface: 255 255 255;
+  --color-ink: 22 32 28;
+  --color-muted: 90 108 98;
+  --color-accent: 15 118 110;
+  --color-border: 210 220 214;
+}
+
+.dark {
+  --color-canvas: 12 18 16;
+  --color-surface: 22 30 27;
+  --color-ink: 232 240 236;
+  --color-muted: 148 168 158;
+  --color-accent: 45 212 191;
+  --color-border: 42 56 50;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgb(var(--color-accent) / 0.12), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgb(var(--color-accent) / 0.08), transparent 50%),
+    rgb(var(--color-canvas));
+  color: rgb(var(--color-ink));
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
