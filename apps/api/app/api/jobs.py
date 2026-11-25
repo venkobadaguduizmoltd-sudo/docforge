@@ -11,10 +11,11 @@ from fastapi.responses import FileResponse, StreamingResponse
 
 from app.core.config import get_settings
 from app.pipeline.generate import new_job_id, run_generate_document
-from app.pipeline.job_store import JobRecord, get_job, save_job
+from app.pipeline.job_store import JobRecord, get_job, list_jobs, save_job
 from app.pipeline.progress import subscribe_progress
-from app.rbac.deps import get_current_user, get_current_user_sse
-from app.schemas.jobs import GenerateJobRequest, JobOut
+from app.rbac.deps import get_current_user, get_current_user_sse, require_role
+from app.rbac.roles import RoleName
+from app.schemas.jobs import GenerateJobRequest, JobListOut, JobOut
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -51,6 +52,14 @@ async def _execute_job(job_id: str, payload: dict) -> None:
         job.status = "failed"
         job.error = str(exc)
         save_job(job)
+
+
+@router.get("", response_model=JobListOut)
+def list_generate_jobs(
+    _user=Depends(require_role(RoleName.TEMPLATE_EDITOR)),
+) -> JobListOut:
+    """Admin jobs console: in-process registry from the current API lifetime."""
+    return JobListOut(jobs=[_to_out(job) for job in list_jobs()])
 
 
 @router.post("/generate", response_model=JobOut)

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
-from app.api import auth, documents, health, jobs, repos, templates
+from app.api import admin, auth, documents, health, jobs, repos, templates
 from app.core.config import get_settings
 from app.core.database import SessionLocal
 from app.core.security import hash_password
@@ -64,6 +64,7 @@ def create_app() -> FastAPI:
     application.include_router(templates.router)
     application.include_router(jobs.router)
     application.include_router(documents.router)
+    application.include_router(admin.router)
     return application
 
 

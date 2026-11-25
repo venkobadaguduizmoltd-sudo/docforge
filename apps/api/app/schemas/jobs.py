@@ -26,6 +26,10 @@ class JobOut(BaseModel):
     updated_at: str
 
 
+class JobListOut(BaseModel):
+    jobs: list[JobOut]
+
+
 class ListReposRequest(BaseModel):
     provider: str = "fixture"
     query: str | None = None
