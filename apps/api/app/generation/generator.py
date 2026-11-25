@@ -15,7 +15,9 @@ ProgressCb = Callable[[str, dict[str, Any]], Awaitable[None]]
 
 SCHEMA_HINT = (
     '{"title": string|null, "summary": string, "bullets": string[], '
-    '"code_refs": string[], "notes": string|null}'
+    '"code_refs": string[], "notes": string|null, '
+    '"citations": [{"file": string, "line": number|null, "end_line": number|null, '
+    '"commit_sha": string|null, "symbol": string|null}]}'
 )
 
 
@@ -25,6 +27,7 @@ async def generate_section_content(
     section_title: str,
     analysis: AnalysisResult,
     llm: LLMClient | None = None,
+    follow_up_prompt: str | None = None,
 ) -> SectionContent:
     client = llm or get_llm_client()
     prompt = build_section_prompt(
@@ -32,6 +35,7 @@ async def generate_section_content(
         section_title=section_title,
         schema_hint=SCHEMA_HINT,
         repo_blob=analysis.prompt_blob(),
+        follow_up_prompt=follow_up_prompt,
     )
     raw = await client.complete_json(system=SYSTEM_GUARD, user=prompt)
     return validate_section_content(section_id, raw)
