@@ -1,10 +1,10 @@
-# DocForge Architecture (Phase 1)
+# DocForge Architecture (Phase 2)
 
 ```
 ┌─────────┐   JWT/SSE    ┌─────────┐  clone/pin   ┌──────────────────┐
 │  web    │ ───────────► │   api   │ ───────────► │ GitHub / GitLab  │
-│ Vite    │              │ FastAPI │              │ or fixture repo  │
-└─────────┘              └────┬────┘              └────────┬─────────┘
+│ Vite    │  documents/  │ FastAPI │              │ or fixture repo  │
+└─────────┘  sections    └────┬────┘              └────────┬─────────┘
                               │ enqueue / inline           │ sandbox
                               ▼                            ▼
                          ┌─────────┐                 analyze+redact
@@ -15,11 +15,11 @@
                               │                    (Ollama or mock)
                               │                           │
                               ▼                           ▼
-                         ┌─────────┐              render HTML/DOCX/PDF
-                         │  MinIO  │              (checksum-sealed template)
-                         └─────────┘
+                         ┌─────────┐     materialize → document_store
+                         │  MinIO  │     edit/regen/suggest/lock/versions
+                         └─────────┘     render HTML/DOCX/PDF (sealed)
 ```
 
-**Invariant:** Templates are immutable per version (SHA-256). Content JSON is keyed by `section_id` only and merged at render time. Repo data is secret-scanned and wrapped in delimited prompt blocks.
+**Invariants:** Templates are immutable per version (SHA-256). Content JSON is keyed by `section_id` only. Section regen/edit/accept change only that section (siblings byte-identical). Citations are content fields pinned to `commit_sha`.
 
 See `docs/DECISIONS.md` and `docs/LICENSES.md`.

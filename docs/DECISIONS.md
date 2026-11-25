@@ -95,3 +95,29 @@ Recorded defaults for the foundation scaffold. Change only with an explicit foll
 ## AD-016 — Prompt injection + secret egress
 
 **Decision:** Redact common secrets before analysis excerpts leave the sandbox. Wrap untrusted repo blobs in `<<<DOCForge_REPO_DATA_BEGIN/END>>>` delimiters with an explicit system guard that ignores instructions inside the block.
+
+## AD-017 — Document store for corrections (in-memory + Alembic)
+
+**Decision:** Phase 2 editable documents live in an in-process `document_store` (same spirit as Phase 1 `job_store`) for CI/dev. Alembic `0003_phase2_corrections` adds Postgres columns for locks, citations, pending suggestions, and provenance (`source_job_id`, `pinned_commit_sha`, template seal).
+
+**Why:** Unblocks section APIs and tests without requiring live Postgres in unit CI; DB schema stays aligned for compose.
+
+**Revisit when:** Persist live documents to Postgres/MinIO and drop the in-memory registry.
+
+## AD-018 — Section-only mutations
+
+**Decision:** Regenerate, manual edit, and accept-suggestion mutate exactly one `section_id`’s content JSON. Sibling sections must remain byte-identical (canonical JSON). Locked sections refuse mutation and are skipped by regenerate-all.
+
+**Why:** Core Phase 2 product invariant alongside template immutability.
+
+## AD-019 — Suggestion mode is non-destructive until accept
+
+**Decision:** `POST .../suggest` stores `pending_suggestion` on the section without creating a content revision. Accept applies proposed content and appends a revision; reject clears the pending payload.
+
+## AD-020 — Versions are full section snapshots
+
+**Decision:** Every successful content/lock mutation appends a `DocumentRevision` with a full per-section snapshot (content, lock, citations, pending suggestion). Diff compares two revision numbers; undo restores `current−1`; restore reapplies a chosen revision then appends a new revision.
+
+## AD-021 — Citations on section content
+
+**Decision:** Citations are content-only fields (`file`, `line`, `end_line`, `commit_sha`, `symbol`) attached when materializing/regenerating from analysis symbols at the document’s pinned commit. They travel in `content_json.citations` and the section `citations` API field. They never alter template structure.
