@@ -1,0 +1,18 @@
+{
+  "id": "builtin.placeholder",
+  "name": "Placeholder Template",
+  "version": 1,
+  "sha256_note": "Checksum computed at publish time over canonical JSON",
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "description": "High-level summary filled by AI content JSON only."
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "description": "Structural description keyed by section id."
+    }
+  ]
+}

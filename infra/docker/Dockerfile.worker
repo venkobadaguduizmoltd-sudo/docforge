@@ -1,0 +1,21 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl build-essential libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY apps/worker/requirements.txt /tmp/requirements.txt
+COPY apps/api/requirements.txt /tmp/api-requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt -r /tmp/api-requirements.txt
+
+COPY apps/worker /app
+COPY apps/api /api
+COPY templates /templates
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/api:/app
+
+CMD ["arq", "worker.main.WorkerSettings"]
