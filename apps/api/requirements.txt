@@ -18,3 +18,8 @@ pytest-asyncio==0.25.0
 ruff==0.8.4
 mypy==1.14.0
 types-passlib==1.7.7.20241221
+jinja2==3.1.4
+python-docx==1.1.2
+reportlab==4.2.5
+tree-sitter==0.23.2
+tree-sitter-python==0.23.6

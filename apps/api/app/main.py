@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
-from app.api import auth, health
+from app.api import auth, health, jobs, repos, templates
 from app.core.config import get_settings
 from app.core.database import SessionLocal
 from app.core.security import hash_password
@@ -35,6 +35,9 @@ def seed_roles_and_admin() -> None:
                 )
             )
         db.commit()
+    except Exception:
+        # Allow API unit paths / OpenAPI import without a live database.
+        db.rollback()
     finally:
         db.close()
 
@@ -47,7 +50,7 @@ async def lifespan(_app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    application = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
+    application = FastAPI(title=settings.app_name, version="0.2.0", lifespan=lifespan)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
@@ -57,6 +60,9 @@ def create_app() -> FastAPI:
     )
     application.include_router(health.router)
     application.include_router(auth.router)
+    application.include_router(repos.router)
+    application.include_router(templates.router)
+    application.include_router(jobs.router)
     return application
 
 

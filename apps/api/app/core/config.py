@@ -1,6 +1,7 @@
 """Application settings loaded from environment variables."""
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -25,9 +26,29 @@ class Settings(BaseSettings):
     app_name: str = "DocForge"
     app_env: str = "development"
 
+    # Phase 1 — providers / LLM
+    github_token: str = ""
+    github_api_base: str = "https://api.github.com"
+    gitlab_token: str = ""
+    gitlab_api_base: str = "https://gitlab.com/api/v4"
+    ollama_base_url: str = "http://localhost:11434"
+    llm_provider: str = "mock"  # mock | openai_compatible
+    llm_model: str = "llama3.2"
+    llm_api_key: str = "ollama"
+    templates_root: str = ""
+    inline_jobs: bool = True  # run generation in-process when true (dev/CI)
+    artifact_dir: str = "/tmp/docforge-artifacts"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def resolved_templates_root(self) -> Path:
+        if self.templates_root:
+            return Path(self.templates_root)
+        # apps/api/app/core -> repo templates/
+        return Path(__file__).resolve().parents[4] / "templates"
 
 
 @lru_cache
