@@ -42,8 +42,8 @@ export function AdminShell({ children, title, description }: AdminShellProps) {
           <h1 className="df-title text-2xl">Admin access required</h1>
           <p className="df-subtitle">
             The admin shell is available to <code className="font-mono text-sm">admin</code> and{" "}
-            <code className="font-mono text-sm">template-editor</code> roles. Deep template and
-            provider UIs land in Phases 4 and 3.
+            <code className="font-mono text-sm">template-editor</code> roles. AI providers are live
+            under this shell; template studio deep UI lands in Phase 4.
           </p>
         </div>
       </AppShell>

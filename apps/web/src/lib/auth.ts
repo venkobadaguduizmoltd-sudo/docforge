@@ -48,3 +48,8 @@ export function canManageUsers(user: User | null | undefined): boolean {
 export function canManageSettings(user: User | null | undefined): boolean {
   return roleAtLeast(user?.role, "admin");
 }
+
+/** Provider CRUD / policy writes require admin; template-editor can list/test. */
+export function canManageProviders(user: User | null | undefined): boolean {
+  return roleAtLeast(user?.role, "admin");
+}

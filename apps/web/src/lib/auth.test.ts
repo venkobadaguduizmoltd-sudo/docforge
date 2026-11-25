@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { canAccessAdmin, canManageSettings, canManageUsers, roleAtLeast } from "@/lib/auth";
+import {
+  canAccessAdmin,
+  canManageProviders,
+  canManageSettings,
+  canManageUsers,
+  roleAtLeast,
+} from "@/lib/auth";
 
 describe("RBAC helpers", () => {
   it("ranks roles for admin shell access", () => {
@@ -14,6 +20,8 @@ describe("RBAC helpers", () => {
     expect(canManageUsers({ role: "template-editor" } as never)).toBe(false);
     expect(canManageSettings({ role: "template-editor" } as never)).toBe(false);
     expect(canManageSettings({ role: "admin" } as never)).toBe(true);
+    expect(canManageProviders({ role: "admin" } as never)).toBe(true);
+    expect(canManageProviders({ role: "template-editor" } as never)).toBe(false);
   });
 
   it("compares role hierarchy", () => {

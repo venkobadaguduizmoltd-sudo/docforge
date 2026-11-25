@@ -297,3 +297,132 @@ export type AdminSettings = {
 export function fetchAdminSettings(token: string): Promise<AdminSettings> {
   return authJson(token, "/admin/settings");
 }
+
+export type AIProvider = {
+  id: string;
+  name: string;
+  adapter_type: string;
+  kind: "model" | "agent";
+  base_url: string | null;
+  default_model: string | null;
+  config_json: Record<string, unknown>;
+  has_api_key: boolean;
+  enabled: boolean;
+  priority: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdapterCatalogItem = {
+  adapter_type: string;
+  kind: string;
+  requires_key: boolean;
+};
+
+export type ProviderList = {
+  providers: AIProvider[];
+  adapters: AdapterCatalogItem[];
+};
+
+export type ProviderPolicy = {
+  id: string;
+  primary_provider_id: string | null;
+  fallback_provider_ids: string[];
+  budget_daily_tokens: number | null;
+  budget_monthly_tokens: number | null;
+  tokens_used_today: number;
+  tokens_used_month: number;
+  allow_paid_providers: boolean;
+  updated_at: string;
+};
+
+export type ProviderTestResult = {
+  ok: boolean;
+  latency_ms: number;
+  message: string;
+  models_sample: string[];
+};
+
+export type ProviderModel = {
+  id: string;
+  name?: string | null;
+  owned_by?: string | null;
+};
+
+export function listAIProviders(token: string): Promise<ProviderList> {
+  return authJson(token, "/admin/providers");
+}
+
+export function createAIProvider(
+  token: string,
+  body: {
+    name: string;
+    adapter_type: string;
+    kind?: "model" | "agent";
+    base_url?: string | null;
+    default_model?: string | null;
+    api_key?: string | null;
+    enabled?: boolean;
+    priority?: number;
+    config_json?: Record<string, unknown>;
+  },
+): Promise<AIProvider> {
+  return authJson(token, "/admin/providers", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateAIProvider(
+  token: string,
+  id: string,
+  body: Record<string, unknown>,
+): Promise<AIProvider> {
+  return authJson(token, `/admin/providers/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteAIProvider(token: string, id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/admin/providers/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `Request failed: ${response.status}`);
+  }
+}
+
+export function testAIProvider(token: string, id: string): Promise<ProviderTestResult> {
+  return authJson(token, `/admin/providers/${id}/test`, { method: "POST" });
+}
+
+export function listProviderModels(
+  token: string,
+  id: string,
+): Promise<{ models: ProviderModel[] }> {
+  return authJson(token, `/admin/providers/${id}/models`);
+}
+
+export function fetchProviderPolicy(token: string): Promise<ProviderPolicy> {
+  return authJson(token, "/admin/provider-policies");
+}
+
+export function updateProviderPolicy(
+  token: string,
+  body: {
+    primary_provider_id?: string | null;
+    fallback_provider_ids?: string[];
+    budget_daily_tokens?: number | null;
+    budget_monthly_tokens?: number | null;
+    allow_paid_providers?: boolean;
+    reset_usage?: boolean;
+  },
+): Promise<ProviderPolicy> {
+  return authJson(token, "/admin/provider-policies", {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
