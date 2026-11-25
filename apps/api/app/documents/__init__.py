@@ -1,14 +1,5 @@
 """Phase 2 document corrections, versions, and section operations."""
 
-from app.documents.store import (
-    DocumentRecord,
-    RevisionRecord,
-    SectionRecord,
-    clear_documents,
-    get_document,
-    list_documents,
-    save_document,
-)
 from app.documents.service import (
     accept_suggestion,
     create_document_from_job_result,
@@ -22,6 +13,15 @@ from app.documents.service import (
     suggest_section,
     undo_document,
     unlock_section,
+)
+from app.documents.store import (
+    DocumentRecord,
+    RevisionRecord,
+    SectionRecord,
+    clear_documents,
+    get_document,
+    list_documents,
+    save_document,
 )
 
 __all__ = [

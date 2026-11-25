@@ -70,7 +70,9 @@ def _apply_content(
     section.updated_at = datetime.now(UTC).isoformat()
 
 
-def create_document_from_job_result(job_result: dict[str, Any], *, job_id: str | None = None) -> DocumentRecord:
+def create_document_from_job_result(
+    job_result: dict[str, Any], *, job_id: str | None = None
+) -> DocumentRecord:
     """Materialize an editable document from a completed generate job result."""
     content = job_result.get("content") or {}
     if not content:
