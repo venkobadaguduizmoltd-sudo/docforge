@@ -8,8 +8,8 @@ from app.core.database import get_db
 from app.models.user import User
 from app.rbac.deps import require_role
 from app.rbac.roles import RoleName
-from app.schemas.auth import UserOut
 from app.schemas.admin import AdminSettingsOut, UserListOut
+from app.schemas.auth import UserOut
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
