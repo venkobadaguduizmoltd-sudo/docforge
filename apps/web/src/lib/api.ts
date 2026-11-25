@@ -264,3 +264,36 @@ export function restoreVersion(
     method: "POST",
   });
 }
+
+export type BuiltinTemplate = {
+  slug: string;
+  name?: string | null;
+  sha256: string;
+  immutable: boolean;
+};
+
+export function listDocuments(token: string): Promise<DocForgeDocument[]> {
+  return authJson(token, "/documents");
+}
+
+export function listBuiltinTemplates(token: string): Promise<{ templates: BuiltinTemplate[] }> {
+  return authJson(token, "/templates/builtin");
+}
+
+export function listJobs(token: string): Promise<{ jobs: Job[] }> {
+  return authJson(token, "/jobs");
+}
+
+export function listUsers(token: string): Promise<{ users: User[] }> {
+  return authJson(token, "/admin/users");
+}
+
+export type AdminSettings = {
+  retention_days: number;
+  feature_flags: Record<string, boolean>;
+  note: string;
+};
+
+export function fetchAdminSettings(token: string): Promise<AdminSettings> {
+  return authJson(token, "/admin/settings");
+}
