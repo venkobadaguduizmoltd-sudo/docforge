@@ -46,7 +46,7 @@ def map_transport_error(exc: BaseException) -> ProviderError:
             retryable=True,
             details={"type": type(exc).__name__},
         )
-    if isinstance(exc, (httpx.ConnectError, httpx.NetworkError)):
+    if isinstance(exc, httpx.ConnectError | httpx.NetworkError):
         return ProviderError(
             ProviderErrorCode.PROVIDER_UNAVAILABLE,
             "Provider unreachable",

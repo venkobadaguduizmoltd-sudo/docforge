@@ -2,7 +2,7 @@
 
 AI documentation platform: generate professional docs from Git repositories into admin-defined **immutable templates**, with live preview and section-level corrections.
 
-> Phase 1 — MVP generation slice. See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
+> Phase 3 — AI providers (DocGenProvider, admin CRUD, routing). See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Core principle
 
@@ -16,8 +16,9 @@ Templates (structure + rendering assets) are **immutable per version** (SHA-256)
 | API | Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic v2 |
 | Worker | Arq + Redis |
 | Data | PostgreSQL 16 + pgvector, MinIO |
-| Optional AI | Ollama (Compose profile); `LLM_PROVIDER=mock` offline |
+| Optional AI | Ollama default; optional OpenAI/Anthropic/Azure/Gemini/Bedrock/Cursor CLI keys |
 | Render | Jinja2 HTML, python-docx, ReportLab PDF |
+| Admin | `/admin/providers` — CRUD, test, models, routing/budgets |
 
 ## Quick start (Docker Compose)
 

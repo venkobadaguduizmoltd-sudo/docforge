@@ -209,7 +209,11 @@ class CursorCLIProvider(DocGenProvider):
                 ProviderErrorCode.PROVIDER_UNAVAILABLE,
                 "Cursor CLI binary not found and Docker unavailable",
             )
-        env = {"CURSOR_API_KEY": self.api_key, "PATH": os.environ.get("PATH", ""), "HOME": tempfile.gettempdir()}
+        env = {
+            "CURSOR_API_KEY": self.api_key,
+            "PATH": os.environ.get("PATH", ""),
+            "HOME": tempfile.gettempdir(),
+        }
         return await self._exec([binary, *argv[1:]], env=env, timeout=timeout)
 
     async def _exec(

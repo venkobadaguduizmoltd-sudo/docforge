@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 
 from app.ai.adapters.openai_compatible import parse_json_content
-from app.ai.errors import ProviderError, ProviderErrorCode
+from app.ai.errors import ProviderError
 from app.ai.http_errors import map_transport_error, raise_for_response
 from app.ai.protocol import DocGenProvider
 from app.ai.types import (

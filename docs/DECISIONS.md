@@ -121,3 +121,33 @@ Recorded defaults for the foundation scaffold. Change only with an explicit foll
 ## AD-021 — Citations on section content
 
 **Decision:** Citations are content-only fields (`file`, `line`, `end_line`, `commit_sha`, `symbol`) attached when materializing/regenerating from analysis symbols at the document’s pinned commit. They travel in `content_json.citations` and the section `citations` API field. They never alter template structure.
+
+## AD-022 — DocGenProvider interface (model | agent)
+
+**Decision:** Phase 3 introduces `DocGenProvider` in `apps/api/app/ai/` with `kind: model | agent`, `complete`, `list_models`, `test_connection`, and `cancel`. Repo git providers remain under `app/providers/`.
+
+**Why:** One generation contract for Ollama-compatible defaults, optional paid HTTP adapters, and the Cursor CLI agent path without coupling the pipeline to a single SDK.
+
+## AD-023 — HTTP adapters without proprietary SDKs
+
+**Decision:** Model adapters (OpenAI-compatible/Ollama, OpenAI, Anthropic, Azure OpenAI, Gemini/Vertex, Bedrock) use `httpx` only. Paid provider keys are optional; the app runs with mock / Ollama without them.
+
+**Why:** Keeps required dependencies OSI-only (AD-007) and avoids commercial SDK coupling.
+
+## AD-024 — Cursor CLI isolation
+
+**Decision:** `cursor_cli` is `kind=agent`. It runs in a throwaway Docker container when Docker is available, injects only `CURSOR_API_KEY`, never passes `--force` (or related force/yes flags), enforces timeouts, and maps exits to normalized errors. Agent kind always skips retrieval.
+
+**Why:** Limits blast radius of an agent tool that can otherwise mutate host state; product policy separates agent from model+RAG paths.
+
+## AD-025 — Envelope encryption for provider secrets
+
+**Decision:** API keys are stored as Fernet envelope blobs (`wrapped_dek` + `ciphertext`) using `APP_SECRETS_KEY` (falls back to `JWT_SECRET` in development). Admin list/detail responses expose `has_api_key` only — never plaintext or ciphertext to the browser.
+
+**Why:** At-rest protection for optional paid keys without a separate KMS in Phase 3.
+
+## AD-026 — Provider routing, fallback, and budgets
+
+**Decision:** `provider_policies` (in-memory store + Alembic `provider_policies` table) holds primary + fallback chain, daily/monthly token budgets, and `allow_paid_providers`. Exhausted budgets raise `policy_blocked`. Generation uses routing via `ProviderLLMClient` when `LLM_PROVIDER` is not mock.
+
+**Normalized errors:** `auth_failed`, `rate_limited`, `timeout`, `invalid_output`, `policy_blocked`, `provider_unavailable`.

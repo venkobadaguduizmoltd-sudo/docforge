@@ -13,7 +13,7 @@ from app.ai.adapters.openai import OpenAIProvider
 from app.ai.adapters.openai_compatible import OpenAICompatibleProvider
 from app.ai.errors import ProviderError, ProviderErrorCode
 from app.ai.protocol import DocGenProvider
-from app.ai.store import ProviderRecord, get_provider, get_policy, list_providers, seed_default_providers
+from app.ai.store import ProviderRecord, get_policy, get_provider, list_providers, seed_default_providers
 from app.ai.types import ProviderKind
 from app.core.config import get_settings
 
