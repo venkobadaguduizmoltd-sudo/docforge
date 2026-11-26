@@ -24,6 +24,8 @@ export default defineConfig({
       "/documents": { target: "http://127.0.0.1:8000", changeOrigin: true },
       "/templates": { target: "http://127.0.0.1:8000", changeOrigin: true },
       "/repos": { target: "http://127.0.0.1:8000", changeOrigin: true },
+      "/webhooks": { target: "http://127.0.0.1:8000", changeOrigin: true },
+      "/integrations": { target: "http://127.0.0.1:8000", changeOrigin: true },
       "/docs": { target: "http://127.0.0.1:8000", changeOrigin: true },
       "/openapi.json": { target: "http://127.0.0.1:8000", changeOrigin: true },
     },
