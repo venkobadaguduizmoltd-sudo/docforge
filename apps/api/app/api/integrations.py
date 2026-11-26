@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field
 
 from app.integrations.docs_as_code import build_docs_pr_body, open_docs_pull_request
 from app.integrations.drift import (
-    compute_changed_files,
     detect_drift,
     incremental_regen_plan,
     map_changed_files_to_sections,
