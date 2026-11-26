@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+/** Empty = same-origin (Vite proxies to the API). Absolute URL for compose/direct. */
+export const API_URL = import.meta.env.VITE_API_URL ?? "";
 
 export type TokenResponse = {
   access_token: string;
@@ -92,7 +93,7 @@ export async function fetchJob(token: string, jobId: string): Promise<Job> {
 }
 
 export function jobEventsUrl(jobId: string, token: string): string {
-  const url = new URL(`${API_URL}/jobs/${jobId}/events`);
+  const url = new URL(`${API_URL}/jobs/${jobId}/events`, window.location.origin);
   url.searchParams.set("access_token", token);
   return url.toString();
 }
