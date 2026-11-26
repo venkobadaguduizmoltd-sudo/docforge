@@ -1,0 +1,58 @@
+{
+  "id": "builtin.software-design-document",
+  "name": "Software Design Document",
+  "slug": "software-design-document",
+  "description": "Architecture and design decisions for a software system.",
+  "tags": [
+    "builtin",
+    "design",
+    "sdd"
+  ],
+  "theme": {
+    "html": "theme/document.html.j2",
+    "css": "theme/styles.css",
+    "docx": "theme/docx-styles.json"
+  },
+  "assets": {
+    "logo": "theme/logo.svg",
+    "fonts": "theme/fonts.txt"
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "description": "Product purpose and context.",
+      "instructions": "Summarize the system purpose, audience, and constraints."
+    },
+    {
+      "id": "goals",
+      "title": "Goals and Non-Goals",
+      "description": "What success looks like.",
+      "instructions": "List goals and explicit non-goals."
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "description": "Runtime and deployment structure.",
+      "instructions": "Describe major components and how they interact."
+    },
+    {
+      "id": "data_model",
+      "title": "Data Model",
+      "description": "Entities and persistence.",
+      "instructions": "Document key entities and storage choices."
+    },
+    {
+      "id": "security",
+      "title": "Security Considerations",
+      "description": "Authn, authz, threats.",
+      "instructions": "Cover authentication, authorization, and notable risks."
+    },
+    {
+      "id": "risks",
+      "title": "Risks and Mitigations",
+      "description": "Open risks.",
+      "instructions": "List risks with mitigations."
+    }
+  ]
+}

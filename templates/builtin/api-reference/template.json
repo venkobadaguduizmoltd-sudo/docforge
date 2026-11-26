@@ -1,0 +1,58 @@
+{
+  "id": "builtin.api-reference",
+  "name": "API Reference",
+  "slug": "api-reference",
+  "description": "HTTP/API surface documentation generated from the repository.",
+  "tags": [
+    "builtin",
+    "api",
+    "reference"
+  ],
+  "theme": {
+    "html": "theme/document.html.j2",
+    "css": "theme/styles.css",
+    "docx": "theme/docx-styles.json"
+  },
+  "assets": {
+    "logo": "theme/logo.svg",
+    "fonts": "theme/fonts.txt"
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "description": "API purpose and base URLs.",
+      "instructions": "Summarize the API audience and base paths."
+    },
+    {
+      "id": "authentication",
+      "title": "Authentication",
+      "description": "How clients authenticate.",
+      "instructions": "Document auth schemes and required headers."
+    },
+    {
+      "id": "endpoints",
+      "title": "Endpoints",
+      "description": "Route catalog.",
+      "instructions": "List primary endpoints with methods and purpose."
+    },
+    {
+      "id": "schemas",
+      "title": "Schemas",
+      "description": "Request/response shapes.",
+      "instructions": "Describe important payload schemas."
+    },
+    {
+      "id": "errors",
+      "title": "Errors",
+      "description": "Error model.",
+      "instructions": "Document error codes and conventions."
+    },
+    {
+      "id": "examples",
+      "title": "Examples",
+      "description": "Sample calls.",
+      "instructions": "Provide representative request/response examples."
+    }
+  ]
+}

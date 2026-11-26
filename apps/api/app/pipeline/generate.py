@@ -69,13 +69,26 @@ async def run_generate_document(job_id: str, payload: dict[str, Any]) -> dict[st
         )
 
         await publish_progress(job_id, "loading_template", {"slug": template_slug})
-        builtin = load_builtin_template(template_slug, settings.resolved_templates_root)
-        spec = builtin["spec"]
-        sha256 = builtin["sha256"]
-        theme_dir = builtin["theme_dir"]
+        try:
+            loaded = load_builtin_template(template_slug, settings.resolved_templates_root)
+            spec = loaded["spec"]
+            sha256 = loaded["sha256"]
+            theme_dir = loaded["theme_dir"]
+        except FileNotFoundError:
+            # Phase 4 studio templates (draft test-run / published gallery)
+            from app.template_studio.store import resolve_spec_for_generation
+
+            studio = resolve_spec_for_generation(template_slug)
+            if studio is None:
+                raise
+            spec = studio["spec"]
+            sha256 = studio["sha256"]
+            # Fall back to shared builtin theme assets when studio has no disk theme.
+            fallback = load_builtin_template("tech-overview", settings.resolved_templates_root)
+            theme_dir = fallback["theme_dir"]
         # Verify immutability seal
         if compute_spec_sha256(spec) != sha256:
-            raise RuntimeError("Builtin template checksum failed")
+            raise RuntimeError("Template checksum failed")
 
         llm = get_llm_client()
 

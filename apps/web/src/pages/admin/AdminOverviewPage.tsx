@@ -56,7 +56,7 @@ export function AdminOverviewPage() {
   return (
     <AdminShell
       title="Overview"
-      description="Professional admin shell. Deep template studio and provider adapters ship in Phases 4 and 3 — this surface is the navigation and RBAC home."
+      description="Admin home for templates, AI providers, users, jobs, and settings."
     >
       {loading ? <LoadingState label="Loading metrics…" rows={2} /> : null}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -71,12 +71,11 @@ export function AdminOverviewPage() {
       <div className="df-panel p-5">
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill label="Shell live" tone="ok" />
-          <StatusPill label="Phase 3 providers pending" tone="warning" />
-          <StatusPill label="Phase 4 templates pending" tone="warning" />
+          <StatusPill label="Phase 3 AI providers" tone="ok" />
+          <StatusPill label="Phase 4 template studio" tone="ok" />
         </div>
         <p className="mt-4 text-sm leading-relaxed text-muted">
-          Earlier phases deferred a dedicated admin UI so generation and corrections could ship first.
-          Use the sidebar for templates, providers, users, jobs, and settings placeholders.
+          Use the sidebar for the template studio, AI providers, users, jobs, and settings.
         </p>
       </div>
     </AdminShell>

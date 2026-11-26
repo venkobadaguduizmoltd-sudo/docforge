@@ -2,7 +2,7 @@
 
 AI documentation platform: generate professional docs from Git repositories into admin-defined **immutable templates**, with live preview and section-level corrections.
 
-> Phase 3 — AI providers (DocGenProvider, admin CRUD, routing). See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
+> Phase 4 — Admin template studio (gallery, prompt/DOCX import, publish). See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Core principle
 
@@ -18,7 +18,7 @@ Templates (structure + rendering assets) are **immutable per version** (SHA-256)
 | Data | PostgreSQL 16 + pgvector, MinIO |
 | Optional AI | Ollama default; optional OpenAI/Anthropic/Azure/Gemini/Bedrock/Cursor CLI keys |
 | Render | Jinja2 HTML, python-docx, ReportLab PDF |
-| Admin | `/admin/providers` — CRUD, test, models, routing/budgets |
+| Admin | `/admin/templates` studio; `/admin/providers` CRUD/test/routing |
 
 ## Quick start (Docker Compose)
 

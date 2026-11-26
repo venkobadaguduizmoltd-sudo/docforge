@@ -1,0 +1,51 @@
+{
+  "id": "builtin.onboarding-guide",
+  "name": "Onboarding Guide",
+  "slug": "onboarding-guide",
+  "description": "First-week onboarding for new teammates.",
+  "tags": [
+    "builtin",
+    "onboarding"
+  ],
+  "theme": {
+    "html": "theme/document.html.j2",
+    "css": "theme/styles.css",
+    "docx": "theme/docx-styles.json"
+  },
+  "assets": {
+    "logo": "theme/logo.svg",
+    "fonts": "theme/fonts.txt"
+  },
+  "sections": [
+    {
+      "id": "welcome",
+      "title": "Welcome",
+      "description": "Context for new hires.",
+      "instructions": "Introduce the team and product."
+    },
+    {
+      "id": "access",
+      "title": "Access and Tools",
+      "description": "Accounts and tooling.",
+      "instructions": "List required access and tools."
+    },
+    {
+      "id": "setup",
+      "title": "Environment Setup",
+      "description": "Dev environment.",
+      "instructions": "Step-by-step machine setup."
+    },
+    {
+      "id": "first_week",
+      "title": "First Week Plan",
+      "description": "Suggested ramp.",
+      "instructions": "Provide a day-by-day checklist."
+    },
+    {
+      "id": "contacts",
+      "title": "Contacts",
+      "description": "People and channels.",
+      "instructions": "Point to owners and chat channels."
+    }
+  ]
+}

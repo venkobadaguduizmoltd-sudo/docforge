@@ -33,6 +33,8 @@ Policy: only free / OSI-approved / self-hostable dependencies for the core platf
 | Auth helpers | python-jose, passlib, bcrypt | MIT / Apache-2.0 / Apache-2.0 |
 | Jobs | Arq, redis-py | MIT |
 | Tests / lint | pytest, ruff, mypy | MIT |
+| JSON Schema | jsonschema | MIT |
+| YAML | PyYAML | MIT |
 | Frontend | React, Vite, TanStack Query, Tailwind | MIT |
 | TypeScript / ESLint | TypeScript, typescript-eslint | Apache-2.0 / MIT |
 | Database image | pgvector/pgvector:pg16 | PostgreSQL + pgvector license |

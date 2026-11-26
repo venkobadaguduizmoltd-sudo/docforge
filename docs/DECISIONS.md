@@ -151,3 +151,21 @@ Recorded defaults for the foundation scaffold. Change only with an explicit foll
 **Decision:** `provider_policies` (in-memory store + Alembic `provider_policies` table) holds primary + fallback chain, daily/monthly token budgets, and `allow_paid_providers`. Exhausted budgets raise `policy_blocked`. Generation uses routing via `ProviderLLMClient` when `LLM_PROVIDER` is not mock.
 
 **Normalized errors:** `auth_failed`, `rate_limited`, `timeout`, `invalid_output`, `policy_blocked`, `provider_unavailable`.
+
+## AD-027 — Template structure JSON Schema
+
+**Decision:** Phase 4 validates every template structure spec with a Draft 2020-12 JSON Schema (`apps/api/app/template_studio/schema.py`) via `jsonschema` (MIT). Specs include `id`, `name`, `slug`, `sections[]` (with optional `instructions` / `content_schema`), plus optional `theme` / `assets` / `tags`.
+
+**Why:** Keeps AI output content-only while making structure authoring machine-checkable before publish.
+
+## AD-028 — Template lifecycle and immutability
+
+**Decision:** Gallery lifecycle is `draft → published → deprecated`. Drafts are mutable; publish seals `sha256` (`compute_spec_sha256`) and sets immutability. Publish requires a successful fixture **test-run**. Clone creates a new draft. Builtins seed as published from `templates/builtin/`.
+
+**Why:** Preserves the core product invariant (immutable templates per version) while enabling an admin studio.
+
+## AD-029 — Prompt / DOCX → draft structure
+
+**Decision:** Prompt-to-template uses a deterministic heuristic (optional provider complete later) then schema-validates. DOCX import walks Heading 1–2 via `python-docx` into sections. Raw YAML round-trips with `PyYAML` (MIT).
+
+**Why:** Fast authoring paths without requiring a live LLM for CI/demo; OSI-only tooling.

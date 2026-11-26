@@ -57,6 +57,10 @@ ALLOWED: dict[str, str] = {
     "reportlab": "BSD-3-Clause",
     "tree-sitter": "MIT",
     "tree-sitter-python": "MIT",
+    "jsonschema": "MIT",
+    "pyyaml": "MIT",
+    "types-jsonschema": "Apache-2.0",
+    "types-pyyaml": "Apache-2.0",
 }
 
 # Simulated commercial-only / non-OSI markers that must never appear

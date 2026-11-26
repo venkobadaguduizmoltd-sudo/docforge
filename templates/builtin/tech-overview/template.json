@@ -12,17 +12,28 @@
     {
       "id": "overview",
       "title": "Overview",
-      "description": "Product purpose and high-level summary."
+      "description": "Product purpose and high-level summary.",
+      "instructions": "Product purpose and high-level summary."
     },
     {
       "id": "architecture",
       "title": "Architecture",
-      "description": "Structural layout of the repository and runtime components."
+      "description": "Structural layout of the repository and runtime components.",
+      "instructions": "Structural layout of the repository and runtime components."
     },
     {
       "id": "key_modules",
       "title": "Key Modules",
-      "description": "Important packages, symbols, and entry points."
+      "description": "Important packages, symbols, and entry points.",
+      "instructions": "Important packages, symbols, and entry points."
     }
-  ]
+  ],
+  "tags": [
+    "builtin",
+    "overview"
+  ],
+  "assets": {
+    "logo": "theme/logo.svg",
+    "fonts": "theme/fonts.txt"
+  }
 }

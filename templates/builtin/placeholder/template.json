@@ -1,18 +1,26 @@
 {
   "id": "builtin.placeholder",
   "name": "Placeholder Template",
-  "version": 1,
-  "sha256_note": "Checksum computed at publish time over canonical JSON",
+  "slug": "placeholder",
+  "description": "Minimal placeholder kept for legacy checks.",
+  "tags": ["builtin", "placeholder"],
+  "theme": {
+    "html": "theme/document.html.j2",
+    "css": "theme/styles.css",
+    "docx": "theme/docx-styles.json"
+  },
   "sections": [
     {
       "id": "overview",
       "title": "Overview",
-      "description": "High-level summary filled by AI content JSON only."
+      "description": "High-level summary filled by AI content JSON only.",
+      "instructions": "Summarize the repository."
     },
     {
       "id": "architecture",
       "title": "Architecture",
-      "description": "Structural description keyed by section id."
+      "description": "Structural description keyed by section id.",
+      "instructions": "Describe major components."
     }
   ]
 }
