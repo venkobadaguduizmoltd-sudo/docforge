@@ -77,7 +77,8 @@ export async function startGenerateJob(
     body: JSON.stringify(body),
   });
   if (!response.ok) {
-    throw new Error("Failed to start job");
+    const detail = (await response.text()).trim();
+    throw new Error(detail || `Failed to start job (${response.status})`);
   }
   return response.json() as Promise<Job>;
 }
