@@ -8,11 +8,21 @@ from pathlib import Path
 
 import httpx
 
-from app.providers.base import CloneResult, RemoteRepo, RepoProvider, RepoRef
+from app.providers.base import (
+    CloneResult,
+    CommitStatusInfo,
+    PullRequestInfo,
+    RemoteRepo,
+    RepoProvider,
+    RepoRef,
+)
 
 
 class GitHubProvider(RepoProvider):
     name = "github"
+
+    def supports_docs_as_code(self) -> bool:
+        return True
 
     def __init__(
         self,
@@ -157,3 +167,67 @@ class GitHubProvider(RepoProvider):
             provider=self.name,
             full_name=full_name,
         )
+
+    async def create_docs_pull_request(
+        self,
+        full_name: str,
+        *,
+        head_branch: str,
+        base_branch: str,
+        title: str,
+        body: str,
+    ) -> PullRequestInfo:
+        client = await self._http()
+        response = await client.post(
+            f"{self.api_base}/repos/{full_name}/pulls",
+            json={
+                "title": title,
+                "body": body,
+                "head": head_branch,
+                "base": base_branch,
+            },
+        )
+        response.raise_for_status()
+        data = response.json()
+        return PullRequestInfo(
+            id=str(data["id"]),
+            number=int(data["number"]),
+            url=data.get("html_url") or "",
+            title=data.get("title") or title,
+            state=data.get("state") or "open",
+            head_sha=(data.get("head") or {}).get("sha") or "",
+            base_ref=base_branch,
+        )
+
+    async def comment_on_pull_request(
+        self,
+        full_name: str,
+        number: int,
+        body: str,
+    ) -> dict:
+        client = await self._http()
+        response = await client.post(
+            f"{self.api_base}/repos/{full_name}/issues/{number}/comments",
+            json={"body": body},
+        )
+        response.raise_for_status()
+        return response.json()
+
+    async def set_commit_status(
+        self,
+        full_name: str,
+        sha: str,
+        status: CommitStatusInfo,
+    ) -> dict:
+        client = await self._http()
+        response = await client.post(
+            f"{self.api_base}/repos/{full_name}/statuses/{sha}",
+            json={
+                "context": status.context,
+                "state": status.state,
+                "description": status.description,
+                "target_url": status.target_url,
+            },
+        )
+        response.raise_for_status()
+        return response.json()

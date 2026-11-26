@@ -9,11 +9,21 @@ from urllib.parse import quote
 
 import httpx
 
-from app.providers.base import CloneResult, RemoteRepo, RepoProvider, RepoRef
+from app.providers.base import (
+    CloneResult,
+    CommitStatusInfo,
+    PullRequestInfo,
+    RemoteRepo,
+    RepoProvider,
+    RepoRef,
+)
 
 
 class GitLabProvider(RepoProvider):
     name = "gitlab"
+
+    def supports_docs_as_code(self) -> bool:
+        return True
 
     def __init__(
         self,
@@ -166,3 +176,77 @@ class GitLabProvider(RepoProvider):
             provider=self.name,
             full_name=full_name,
         )
+
+    async def create_docs_pull_request(
+        self,
+        full_name: str,
+        *,
+        head_branch: str,
+        base_branch: str,
+        title: str,
+        body: str,
+    ) -> PullRequestInfo:
+        client = await self._http()
+        project = self._project_path(full_name)
+        response = await client.post(
+            f"{self.api_base}/projects/{project}/merge_requests",
+            json={
+                "title": title,
+                "description": body,
+                "source_branch": head_branch,
+                "target_branch": base_branch,
+            },
+        )
+        response.raise_for_status()
+        data = response.json()
+        return PullRequestInfo(
+            id=str(data["id"]),
+            number=int(data["iid"]),
+            url=data.get("web_url") or "",
+            title=data.get("title") or title,
+            state=data.get("state") or "opened",
+            head_sha=data.get("sha") or "",
+            base_ref=base_branch,
+        )
+
+    async def comment_on_pull_request(
+        self,
+        full_name: str,
+        number: int,
+        body: str,
+    ) -> dict:
+        client = await self._http()
+        project = self._project_path(full_name)
+        response = await client.post(
+            f"{self.api_base}/projects/{project}/merge_requests/{number}/notes",
+            json={"body": body},
+        )
+        response.raise_for_status()
+        return response.json()
+
+    async def set_commit_status(
+        self,
+        full_name: str,
+        sha: str,
+        status: CommitStatusInfo,
+    ) -> dict:
+        client = await self._http()
+        project = self._project_path(full_name)
+        # GitLab: pending|running|success|failed|canceled
+        state_map = {
+            "pending": "pending",
+            "success": "success",
+            "failure": "failed",
+            "error": "failed",
+        }
+        response = await client.post(
+            f"{self.api_base}/projects/{project}/statuses/{sha}",
+            json={
+                "state": state_map.get(status.state, status.state),
+                "name": status.context,
+                "description": status.description,
+                "target_url": status.target_url,
+            },
+        )
+        response.raise_for_status()
+        return response.json()

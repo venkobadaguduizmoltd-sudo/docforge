@@ -11,12 +11,14 @@ from app.api import (
     auth,
     documents,
     health,
+    integrations,
     jobs,
     providers_admin,
     quality,
     repos,
     templates,
     templates_admin,
+    webhooks,
 )
 from app.core.config import get_settings
 from app.core.database import SessionLocal
@@ -61,7 +63,7 @@ async def lifespan(_app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    application = FastAPI(title=settings.app_name, version="0.6.0", lifespan=lifespan)
+    application = FastAPI(title=settings.app_name, version="0.7.0", lifespan=lifespan)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
@@ -81,6 +83,8 @@ def create_app() -> FastAPI:
     application.include_router(providers_admin.router)
     application.include_router(templates_admin.router)
     application.include_router(quality.router)
+    application.include_router(webhooks.router)
+    application.include_router(integrations.router)
     return application
 
 

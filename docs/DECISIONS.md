@@ -76,9 +76,9 @@ Recorded defaults for the foundation scaffold. Change only with an explicit foll
 
 ## AD-013 — Repo providers
 
-**Decision:** `RepoProvider` interface with `github`, `gitlab`, and `fixture` adapters. CI and default local runs use `fixture` (copies `apps/api/tests/fixtures/sample_repo`). Live providers use tokens from env/request.
+**Decision:** `RepoProvider` interface with `github`, `gitlab`, and `fixture` adapters (Phase 1). Phase 6 extends the same contract with `bitbucket`, `azure_devops`, `gitea`/`forgejo`, `generic_git`, and `upload`. CI and default local runs use `fixture` (copies `apps/api/tests/fixtures/sample_repo`). Live providers use tokens from env/request.
 
-**Why:** Keeps the generation path testable without network; GitHub/GitLab share the same clone/pin contract (ref → SHA, shallow clone, pin on job).
+**Why:** Keeps the generation path testable without network; all forges share the same clone/pin contract (ref → SHA, shallow clone, pin on job).
 
 ## AD-014 — LLM default for Phase 1
 
@@ -205,3 +205,27 @@ Recorded defaults for the foundation scaffold. Change only with an explicit foll
 **Decision:** `/admin/quality/hooks` runs Vale and lychee when binaries exist; otherwise reports optional skip. Generation attaches hook results to job quality metadata.
 
 **Why:** Self-hosted prose/link checks without hard dependency on those tools in CI.
+
+## AD-036 — Extended forge adapters
+
+**Decision:** Phase 6 registers Bitbucket Cloud/DC, Azure DevOps, Gitea/Forgejo, generic Git (HTTPS/SSH URL), and upload (ZIP/tarball) behind the same `RepoProvider` interface. Factory accepts per-request tokens/`api_base` plus forge-specific kwargs (`organization`, `clone_url`, `archive_bytes`).
+
+**Why:** One generation/clone contract across hosts; conformance suite uses httpx `MockTransport` + fixture/upload archives so CI stays offline.
+
+## AD-037 — Webhooks: verify, normalize, replay
+
+**Decision:** Webhook registrations live in an in-memory store (secret returned once). Delivery verifies HMAC/shared-secret per provider, normalizes to `NormalizedWebhookEvent`, and rejects replays via delivery-id + timestamp TTL (`ReplayGuard`).
+
+**Why:** Safe inbound automation without persisting forge-specific payload shapes in the job pipeline.
+
+## AD-038 — Docs-as-code PR/MR + status
+
+**Decision:** Providers that opt in (`supports_docs_as_code`) implement create PR/MR, comment, and commit status. GitHub, GitLab, Gitea, and fixture support this in Phase 6; `/integrations/docs-as-code` orchestrates open + comment + success status.
+
+**Why:** Generated docs land as reviewable changes with a visible check, without requiring every forge to support statuses.
+
+## AD-039 — Drift detection + incremental regen
+
+**Decision:** Drift compares pinned SHA to branch head via `resolve_ref`. Changed-file lists map to sections through a heuristic path→section table; `incremental_regen_plan` returns noop | incremental | full.
+
+**Why:** Avoids full regeneration when only a subset of the tree drifted.

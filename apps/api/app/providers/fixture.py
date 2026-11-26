@@ -5,14 +5,25 @@ from __future__ import annotations
 import hashlib
 import shutil
 from pathlib import Path
+from typing import Any
 
-from app.providers.base import CloneResult, RemoteRepo, RepoProvider, RepoRef
+from app.providers.base import (
+    CloneResult,
+    CommitStatusInfo,
+    PullRequestInfo,
+    RemoteRepo,
+    RepoProvider,
+    RepoRef,
+)
 
 DEFAULT_FIXTURE = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "sample_repo"
 
 
 class FixtureProvider(RepoProvider):
     name = "fixture"
+
+    def supports_docs_as_code(self) -> bool:
+        return True
 
     def __init__(self, fixture_root: Path | None = None) -> None:
         self.fixture_root = fixture_root or DEFAULT_FIXTURE
@@ -73,3 +84,44 @@ class FixtureProvider(RepoProvider):
             provider=self.name,
             full_name=full_name,
         )
+
+    async def create_docs_pull_request(
+        self,
+        full_name: str,
+        *,
+        head_branch: str,
+        base_branch: str,
+        title: str,
+        body: str,
+    ) -> PullRequestInfo:
+        return PullRequestInfo(
+            id="fixture-pr-1",
+            number=1,
+            url=f"https://fixture.local/{full_name}/pull/1",
+            title=title,
+            state="open",
+            head_sha=self._sha_for(head_branch),
+            base_ref=base_branch,
+        )
+
+    async def comment_on_pull_request(
+        self,
+        full_name: str,
+        number: int,
+        body: str,
+    ) -> dict[str, Any]:
+        return {"id": 1, "body": body, "full_name": full_name, "number": number}
+
+    async def set_commit_status(
+        self,
+        full_name: str,
+        sha: str,
+        status: CommitStatusInfo,
+    ) -> dict[str, Any]:
+        return {
+            "full_name": full_name,
+            "sha": sha,
+            "context": status.context,
+            "state": status.state,
+            "description": status.description,
+        }

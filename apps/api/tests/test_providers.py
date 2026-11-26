@@ -24,9 +24,14 @@ async def test_fixture_provider_list_clone(tmp_path) -> None:
 
 def test_factory_unknown() -> None:
     with pytest.raises(ValueError):
-        get_repo_provider("bitbucket")
+        get_repo_provider("not-a-real-provider")
 
 
 def test_github_requires_token() -> None:
     with pytest.raises(ValueError):
         get_repo_provider("github", token="")
+
+
+def test_factory_bitbucket_requires_token() -> None:
+    with pytest.raises(ValueError):
+        get_repo_provider("bitbucket", token="")

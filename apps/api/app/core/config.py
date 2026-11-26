@@ -26,11 +26,21 @@ class Settings(BaseSettings):
     app_name: str = "DocForge"
     app_env: str = "development"
 
-    # Phase 1 — providers / LLM
+    # Phase 1 / 6 — repo providers / LLM
     github_token: str = ""
     github_api_base: str = "https://api.github.com"
     gitlab_token: str = ""
     gitlab_api_base: str = "https://gitlab.com/api/v4"
+    bitbucket_token: str = ""
+    bitbucket_username: str = ""
+    bitbucket_workspace: str = ""
+    bitbucket_api_base: str = "https://api.bitbucket.org/2.0"
+    azure_devops_token: str = ""
+    azure_devops_org: str = ""
+    azure_devops_project: str = ""
+    gitea_token: str = ""
+    gitea_api_base: str = "https://gitea.com/api/v1"
+    webhook_replay_ttl_seconds: int = 600
     ollama_base_url: str = "http://localhost:11434"
     llm_provider: str = "mock"  # mock | openai_compatible
     llm_model: str = "llama3.2"
