@@ -355,7 +355,6 @@ def ensure_seeded_builtins() -> None:
     if _SEEDED:
         return
     _SEEDED = True
-    from pathlib import Path
 
     from app.core.config import get_settings
     from app.services.templates import load_builtin_template
