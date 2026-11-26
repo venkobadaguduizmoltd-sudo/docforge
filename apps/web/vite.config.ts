@@ -12,6 +12,8 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    // Cursor Try Live / VM proxy hostnames (*.cursorvm.com)
+    allowedHosts: [".cursorvm.com", "localhost", "127.0.0.1"],
   },
   test: {
     environment: "node",
