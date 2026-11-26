@@ -25,9 +25,11 @@ def test_docignore_skips_env_and_secrets() -> None:
     root = FIXTURES / "malicious_repo"
     patterns = load_docignore(root)
     assert is_ignored(".env", patterns)
+    assert is_ignored("credentials/api.secret", patterns)
     analysis = analyze_repository(root)
     assert ".env" not in analysis.files
-    assert ".env" in analysis.ignored_files
+    assert "credentials/api.secret" not in analysis.files
+    assert any(p.startswith("credentials/") for p in analysis.ignored_files)
     blob = analysis.prompt_blob()
     assert "should-never-reach-the-llm" not in blob
     assert "super-secret-key-value" not in blob
