@@ -1,4 +1,4 @@
-"""RepoProvider abstraction — authenticate, list, resolve, shallow clone."""
+"""RepoProvider abstraction — authenticate, list, resolve, shallow clone, docs-as-code."""
 
 from __future__ import annotations
 
@@ -34,6 +34,25 @@ class CloneResult:
     full_name: str
 
 
+@dataclass(frozen=True)
+class PullRequestInfo:
+    id: str
+    number: int
+    url: str
+    title: str
+    state: str
+    head_sha: str
+    base_ref: str
+
+
+@dataclass(frozen=True)
+class CommitStatusInfo:
+    context: str
+    state: str  # pending | success | failure | error
+    description: str
+    target_url: str | None = None
+
+
 class RepoProvider(ABC):
     """Git hosting adapter interface."""
 
@@ -65,3 +84,35 @@ class RepoProvider(ABC):
         depth: int = 1,
     ) -> CloneResult:
         """Shallow clone pinned to the resolved commit SHA."""
+
+    # --- Docs-as-code (optional; raise NotImplementedError if unsupported) ---
+
+    async def create_docs_pull_request(
+        self,
+        full_name: str,
+        *,
+        head_branch: str,
+        base_branch: str,
+        title: str,
+        body: str,
+    ) -> PullRequestInfo:
+        raise NotImplementedError(f"{self.name} does not support docs-as-code PRs")
+
+    async def comment_on_pull_request(
+        self,
+        full_name: str,
+        number: int,
+        body: str,
+    ) -> dict[str, Any]:
+        raise NotImplementedError(f"{self.name} does not support PR comments")
+
+    async def set_commit_status(
+        self,
+        full_name: str,
+        sha: str,
+        status: CommitStatusInfo,
+    ) -> dict[str, Any]:
+        raise NotImplementedError(f"{self.name} does not support commit statuses")
+
+    def supports_docs_as_code(self) -> bool:
+        return False

@@ -6,7 +6,10 @@ from pydantic import BaseModel, Field
 
 
 class GenerateJobRequest(BaseModel):
-    provider: str = Field(default="fixture", description="fixture | github | gitlab")
+    provider: str = Field(
+        default="fixture",
+        description="fixture | github | gitlab | bitbucket | azure_devops | gitea | generic_git | upload",
+    )
     full_name: str = "docforge/sample"
     ref: str = "main"
     template_slug: str = "tech-overview"

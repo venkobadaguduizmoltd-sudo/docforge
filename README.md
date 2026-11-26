@@ -2,7 +2,7 @@
 
 AI documentation platform: generate professional docs from Git repositories into admin-defined **immutable templates**, with live preview and section-level corrections.
 
-> Phase 5 — Quality & security (docignore, hallucination checks, diagrams, Vale/lychee hooks). See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
+> Phase 6 — Repo integrations (Bitbucket/Azure/Gitea/generic Git/upload, webhooks, docs-as-code, drift). See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Core principle
 
