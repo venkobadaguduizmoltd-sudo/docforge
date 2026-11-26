@@ -169,3 +169,39 @@ Recorded defaults for the foundation scaffold. Change only with an explicit foll
 **Decision:** Prompt-to-template uses a deterministic heuristic (optional provider complete later) then schema-validates. DOCX import walks Heading 1–2 via `python-docx` into sections. Raw YAML round-trips with `PyYAML` (MIT).
 
 **Why:** Fast authoring paths without requiring a live LLM for CI/demo; OSI-only tooling.
+
+## AD-030 — `.docignore` + hardened secret redaction
+
+**Decision:** Analysis honors `.docignore` (gitignore-like) before reading files into prompt blobs. Secret scanners cover additional high-signal patterns (cloud keys, connection strings, JWTs) and redact before excerpts leave the sandbox.
+
+**Why:** Prevents credential and junk-path leakage into LLM context.
+
+## AD-031 — Prompt-injection neutralization
+
+**Decision:** Repo blobs are delimiter-wrapped (`prompt_wrap`) and known injection phrases are stripped at analysis time and again at wrap time. Malicious fixture tests assert neutralization.
+
+**Why:** Defense-in-depth against instruction smuggling in README/comments.
+
+## AD-032 — Hallucination validation against analysis
+
+**Decision:** Post-generation checks ensure `code_refs`, citation files/symbols, path-like tokens, and OpenAPI endpoints exist in analysis indexes. Soft-recorded on jobs; optional `strict_hallucination` hard-fails.
+
+**Why:** Ground documentation claims in the repository snapshot.
+
+## AD-033 — Diagram model, not raw diagram languages
+
+**Decision:** LLMs may only emit a JSON `DiagramModel` (nodes/edges/theme tokens). Rendering produces DOT/D2 deterministically; Graphviz/`d2` used when installed, otherwise an SVG stub. Raw `digraph`/D2/PlantUML in payloads is rejected.
+
+**Why:** Keeps styling/theme under product control and avoids executing untrusted diagram source.
+
+## AD-034 — Deterministic extractors + hierarchical summaries
+
+**Decision:** OpenAPI, env key names (never values), and dependency manifests are extracted without an LLM. Hierarchical summarization builds file/directory/repo rollups for prompt context.
+
+**Why:** Stable structure for generation and hallucination checks.
+
+## AD-035 — Vale / lychee quality hooks
+
+**Decision:** `/admin/quality/hooks` runs Vale and lychee when binaries exist; otherwise reports optional skip. Generation attaches hook results to job quality metadata.
+
+**Why:** Self-hosted prose/link checks without hard dependency on those tools in CI.

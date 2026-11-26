@@ -20,3 +20,11 @@ def test_prompt_wrap_delimits_and_strips_collision() -> None:
     assert wrapped.startswith(BEGIN)
     assert wrapped.endswith(END)
     assert BEGIN not in wrapped[len(BEGIN) : -len(END)]
+
+
+def test_connection_string_redacted() -> None:
+    text = "DATABASE_URL=postgres://user:pass@localhost:5432/db"
+    cleaned, findings = redact_text(text)
+    assert findings
+    assert "postgres://user:pass" not in cleaned
+    assert REDACTION in cleaned

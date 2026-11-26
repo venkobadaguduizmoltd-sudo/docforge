@@ -39,6 +39,7 @@ def get_settings_placeholder(
             "paid_providers": policy.allow_paid_providers,
             "template_studio": True,
             "ai_providers": True,
+            "quality_hooks": True,
         },
-        note="Retention placeholders remain; providers and template studio live under /admin.",
+        note="Retention placeholders remain; providers, templates, and quality hooks under /admin.",
     )

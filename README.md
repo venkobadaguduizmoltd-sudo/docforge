@@ -2,7 +2,7 @@
 
 AI documentation platform: generate professional docs from Git repositories into admin-defined **immutable templates**, with live preview and section-level corrections.
 
-> Phase 4 — Admin template studio (gallery, prompt/DOCX import, publish). See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
+> Phase 5 — Quality & security (docignore, hallucination checks, diagrams, Vale/lychee hooks). See [docs/architecture.md](docs/architecture.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Core principle
 

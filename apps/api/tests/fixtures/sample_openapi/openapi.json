@@ -1,0 +1,11 @@
+{
+  "openapi": "3.0.0",
+  "info": {"title": "Sample", "version": "1.0.0"},
+  "paths": {
+    "/health": {"get": {"summary": "Health"}},
+    "/items": {
+      "get": {"summary": "List"},
+      "post": {"summary": "Create"}
+    }
+  }
+}

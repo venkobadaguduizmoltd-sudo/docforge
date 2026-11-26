@@ -19,6 +19,7 @@ export default defineConfig({
       "/auth": { target: "http://127.0.0.1:8000", changeOrigin: true },
       "/health": { target: "http://127.0.0.1:8000", changeOrigin: true },
       "/admin": { target: "http://127.0.0.1:8000", changeOrigin: true },
+
       "/jobs": { target: "http://127.0.0.1:8000", changeOrigin: true },
       "/documents": { target: "http://127.0.0.1:8000", changeOrigin: true },
       "/templates": { target: "http://127.0.0.1:8000", changeOrigin: true },
