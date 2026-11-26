@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.ai.errors import ProviderError
 from app.ai.factory import build_provider, ensure_seeded, list_adapter_catalog
@@ -103,16 +103,22 @@ def admin_update_provider(
     return _to_out(record)
 
 
-@router.delete("/providers/{provider_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/providers/{provider_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 def admin_delete_provider(
     provider_id: str,
     _user: User = Depends(require_role(RoleName.ADMIN)),
-) -> None:
+) -> Response:
+    """204 must not declare a JSON body — return an empty Response."""
     ensure_seeded()
     try:
         delete_provider(provider_id)
     except KeyError:
         raise HTTPException(status_code=404, detail="Provider not found") from None
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/providers/{provider_id}/test", response_model=ProviderTestOut)
