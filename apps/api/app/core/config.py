@@ -39,6 +39,20 @@ class Settings(BaseSettings):
     inline_jobs: bool = True  # run generation in-process when true (dev/CI)
     artifact_dir: str = "/tmp/docforge-artifacts"
 
+    # Phase 3 — AI providers / envelope encryption
+    # Prefer a dedicated secret; falls back to jwt_secret in encryption helper when empty.
+    app_secrets_key: str = ""
+    openai_api_key: str = ""
+    anthropic_api_key: str = ""
+    azure_openai_api_key: str = ""
+    azure_openai_endpoint: str = ""
+    gemini_api_key: str = ""
+    bedrock_api_key: str = ""
+    cursor_api_key: str = ""
+    cursor_cli_docker_image: str = "cursor-agent:local"
+    # Gate live provider conformance/integration tests.
+    docforge_live_provider_tests: bool = False
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

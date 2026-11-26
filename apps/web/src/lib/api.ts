@@ -96,3 +96,333 @@ export function jobEventsUrl(jobId: string, token: string): string {
   url.searchParams.set("access_token", token);
   return url.toString();
 }
+
+export type Citation = {
+  file: string;
+  line?: number | null;
+  end_line?: number | null;
+  commit_sha?: string | null;
+  symbol?: string | null;
+};
+
+export type DocumentSection = {
+  section_id: string;
+  content_json: Record<string, unknown>;
+  is_locked: boolean;
+  citations: Citation[];
+  pending_suggestion: {
+    proposed?: Record<string, unknown>;
+    current?: Record<string, unknown>;
+    prompt?: string | null;
+  } | null;
+  updated_at: string;
+};
+
+export type DocForgeDocument = {
+  id: string;
+  title: string;
+  status: string;
+  source_job_id: string | null;
+  template_slug: string;
+  template_sha256: string | null;
+  pinned_commit_sha: string | null;
+  sections: DocumentSection[];
+  current_revision: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Revision = {
+  revision_number: number;
+  note: string | null;
+  created_at: string;
+};
+
+async function authJson<T>(token: string, path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ...(init?.headers ?? {}),
+    },
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `Request failed: ${response.status}`);
+  }
+  return response.json() as Promise<T>;
+}
+
+export function materializeDocument(token: string, jobId: string): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/from-job/${jobId}`, { method: "POST" });
+}
+
+export function fetchDocument(token: string, documentId: string): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}`);
+}
+
+export function editSection(
+  token: string,
+  documentId: string,
+  sectionId: string,
+  content: Record<string, unknown>,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/sections/${sectionId}`, {
+    method: "PUT",
+    body: JSON.stringify({ content }),
+  });
+}
+
+export function regenerateSection(
+  token: string,
+  documentId: string,
+  sectionId: string,
+  prompt?: string,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/sections/${sectionId}/regenerate`, {
+    method: "POST",
+    body: JSON.stringify({ prompt: prompt || null }),
+  });
+}
+
+export function regenerateAllUnlocked(
+  token: string,
+  documentId: string,
+  prompt?: string,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/regenerate`, {
+    method: "POST",
+    body: JSON.stringify({ prompt: prompt || null }),
+  });
+}
+
+export function suggestSection(
+  token: string,
+  documentId: string,
+  sectionId: string,
+  prompt?: string,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/sections/${sectionId}/suggest`, {
+    method: "POST",
+    body: JSON.stringify({ prompt: prompt || null }),
+  });
+}
+
+export function acceptSuggestion(
+  token: string,
+  documentId: string,
+  sectionId: string,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/sections/${sectionId}/suggestions/accept`, {
+    method: "POST",
+  });
+}
+
+export function rejectSuggestion(
+  token: string,
+  documentId: string,
+  sectionId: string,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/sections/${sectionId}/suggestions/reject`, {
+    method: "POST",
+  });
+}
+
+export function lockSection(
+  token: string,
+  documentId: string,
+  sectionId: string,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/sections/${sectionId}/lock`, { method: "POST" });
+}
+
+export function unlockSection(
+  token: string,
+  documentId: string,
+  sectionId: string,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/sections/${sectionId}/unlock`, {
+    method: "POST",
+  });
+}
+
+export function fetchVersions(token: string, documentId: string): Promise<Revision[]> {
+  return authJson(token, `/documents/${documentId}/versions`);
+}
+
+export function undoDocument(token: string, documentId: string): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/undo`, { method: "POST" });
+}
+
+export function restoreVersion(
+  token: string,
+  documentId: string,
+  revisionNumber: number,
+): Promise<DocForgeDocument> {
+  return authJson(token, `/documents/${documentId}/versions/${revisionNumber}/restore`, {
+    method: "POST",
+  });
+}
+
+export type BuiltinTemplate = {
+  slug: string;
+  name?: string | null;
+  sha256: string;
+  immutable: boolean;
+};
+
+export function listDocuments(token: string): Promise<DocForgeDocument[]> {
+  return authJson(token, "/documents");
+}
+
+export function listBuiltinTemplates(token: string): Promise<{ templates: BuiltinTemplate[] }> {
+  return authJson(token, "/templates/builtin");
+}
+
+export function listJobs(token: string): Promise<{ jobs: Job[] }> {
+  return authJson(token, "/jobs");
+}
+
+export function listUsers(token: string): Promise<{ users: User[] }> {
+  return authJson(token, "/admin/users");
+}
+
+export type AdminSettings = {
+  retention_days: number;
+  feature_flags: Record<string, boolean>;
+  note: string;
+};
+
+export function fetchAdminSettings(token: string): Promise<AdminSettings> {
+  return authJson(token, "/admin/settings");
+}
+
+export type AIProvider = {
+  id: string;
+  name: string;
+  adapter_type: string;
+  kind: "model" | "agent";
+  base_url: string | null;
+  default_model: string | null;
+  config_json: Record<string, unknown>;
+  has_api_key: boolean;
+  enabled: boolean;
+  priority: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdapterCatalogItem = {
+  adapter_type: string;
+  kind: string;
+  requires_key: boolean;
+};
+
+export type ProviderList = {
+  providers: AIProvider[];
+  adapters: AdapterCatalogItem[];
+};
+
+export type ProviderPolicy = {
+  id: string;
+  primary_provider_id: string | null;
+  fallback_provider_ids: string[];
+  budget_daily_tokens: number | null;
+  budget_monthly_tokens: number | null;
+  tokens_used_today: number;
+  tokens_used_month: number;
+  allow_paid_providers: boolean;
+  updated_at: string;
+};
+
+export type ProviderTestResult = {
+  ok: boolean;
+  latency_ms: number;
+  message: string;
+  models_sample: string[];
+};
+
+export type ProviderModel = {
+  id: string;
+  name?: string | null;
+  owned_by?: string | null;
+};
+
+export function listAIProviders(token: string): Promise<ProviderList> {
+  return authJson(token, "/admin/providers");
+}
+
+export function createAIProvider(
+  token: string,
+  body: {
+    name: string;
+    adapter_type: string;
+    kind?: "model" | "agent";
+    base_url?: string | null;
+    default_model?: string | null;
+    api_key?: string | null;
+    enabled?: boolean;
+    priority?: number;
+    config_json?: Record<string, unknown>;
+  },
+): Promise<AIProvider> {
+  return authJson(token, "/admin/providers", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateAIProvider(
+  token: string,
+  id: string,
+  body: Record<string, unknown>,
+): Promise<AIProvider> {
+  return authJson(token, `/admin/providers/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteAIProvider(token: string, id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/admin/providers/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `Request failed: ${response.status}`);
+  }
+}
+
+export function testAIProvider(token: string, id: string): Promise<ProviderTestResult> {
+  return authJson(token, `/admin/providers/${id}/test`, { method: "POST" });
+}
+
+export function listProviderModels(
+  token: string,
+  id: string,
+): Promise<{ models: ProviderModel[] }> {
+  return authJson(token, `/admin/providers/${id}/models`);
+}
+
+export function fetchProviderPolicy(token: string): Promise<ProviderPolicy> {
+  return authJson(token, "/admin/provider-policies");
+}
+
+export function updateProviderPolicy(
+  token: string,
+  body: {
+    primary_provider_id?: string | null;
+    fallback_provider_ids?: string[];
+    budget_daily_tokens?: number | null;
+    budget_monthly_tokens?: number | null;
+    allow_paid_providers?: boolean;
+    reset_usage?: boolean;
+  },
+): Promise<ProviderPolicy> {
+  return authJson(token, "/admin/provider-policies", {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}

@@ -7,6 +7,16 @@ from typing import Any
 from pydantic import BaseModel, Field, ValidationError
 
 
+class Citation(BaseModel):
+    """Source citation pinned to a repository commit."""
+
+    file: str
+    line: int | None = None
+    end_line: int | None = None
+    commit_sha: str | None = None
+    symbol: str | None = None
+
+
 class SectionContent(BaseModel):
     """Allowed content payload for a single section."""
 
@@ -15,6 +25,8 @@ class SectionContent(BaseModel):
     bullets: list[str] = Field(default_factory=list)
     code_refs: list[str] = Field(default_factory=list)
     notes: str | None = None
+    # Phase 2 — citations (file+line at pinned commit); content-only, not template structure
+    citations: list[Citation] = Field(default_factory=list)
 
 
 class DocumentContent(BaseModel):

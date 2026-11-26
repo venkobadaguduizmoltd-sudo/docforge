@@ -19,14 +19,28 @@ def wrap_repo_data(payload: str) -> str:
     return f"{BEGIN}\n{safe}\n{END}"
 
 
-def build_section_prompt(*, section_id: str, section_title: str, schema_hint: str, repo_blob: str) -> str:
+def build_section_prompt(
+    *,
+    section_id: str,
+    section_title: str,
+    schema_hint: str,
+    repo_blob: str,
+    follow_up_prompt: str | None = None,
+) -> str:
     wrapped = wrap_repo_data(repo_blob)
+    follow = ""
+    if follow_up_prompt:
+        follow = (
+            f"\nFollow-up instruction from the editor (trusted):\n"
+            f"{follow_up_prompt.strip()}\n"
+        )
     return (
         f"{SYSTEM_GUARD}\n\n"
         f"Generate documentation content for section_id={section_id!r} "
         f"({section_title}).\n"
         f"Return a single JSON object with keys allowed by this schema hint:\n"
         f"{schema_hint}\n"
-        f"Do not invent other section ids. Do not include template structure.\n\n"
+        f"Do not invent other section ids. Do not include template structure.\n"
+        f"{follow}\n"
         f"{wrapped}\n"
     )

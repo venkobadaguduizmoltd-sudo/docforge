@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
-import { fetchHealth, fetchMe } from "@/lib/api";
-
-const TOKEN_KEY = "docforge-token";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { useAuth } from "@/hooks/useAuth";
+import { fetchHealth, listDocuments } from "@/lib/api";
 
 export function HomePage() {
-  const token = typeof window !== "undefined" ? window.localStorage.getItem(TOKEN_KEY) : null;
+  const { token, user, isLoading: authLoading } = useAuth();
 
   const health = useQuery({
     queryKey: ["health"],
@@ -14,48 +17,114 @@ export function HomePage() {
     retry: false,
   });
 
-  const me = useQuery({
-    queryKey: ["me", token],
-    queryFn: () => fetchMe(token!),
+  const docs = useQuery({
+    queryKey: ["documents", token],
+    queryFn: () => listDocuments(token!),
     enabled: Boolean(token),
     retry: false,
   });
 
   return (
     <AppShell>
-      <section className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-semibold tracking-tight">Workspace</h2>
-          <p className="mt-2 max-w-xl text-muted">
-            Phase 1 MVP: generate docs from GitHub/GitLab/fixture repos into an immutable template.
-          </p>
+      <div className="space-y-8">
+        <PageHeader
+          kicker="Workspace"
+          title="Docs"
+          description="Materialized documents from completed generate jobs. Open one to edit sections, suggestions, locks, and versions."
+          actions={
+            token ? (
+              <Link to="/generate" className="df-btn-primary">
+                Generate
+              </Link>
+            ) : (
+              <Link to="/login" className="df-btn-primary">
+                Sign in
+              </Link>
+            )
+          }
+        />
+
+        <div className="flex flex-wrap gap-3 text-sm">
+          <StatusPill
+            label={
+              health.isLoading
+                ? "API…"
+                : health.data?.status === "ok"
+                  ? "API healthy"
+                  : "API unavailable"
+            }
+            tone={health.data?.status === "ok" ? "ok" : health.isError ? "failed" : "default"}
+          />
+          <StatusPill
+            label={
+              !token
+                ? "Signed out"
+                : authLoading
+                  ? "Session…"
+                  : user
+                    ? user.email
+                    : "Session expired"
+            }
+            tone={user ? "ok" : "inactive"}
+          />
         </div>
-        <dl className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-border bg-surface/70 p-4">
-            <dt className="font-mono text-xs uppercase tracking-wider text-muted">API</dt>
-            <dd className="mt-2 text-lg font-medium">
-              {health.isLoading ? "Checking…" : health.data?.status === "ok" ? "Healthy" : "Unavailable"}
-            </dd>
+
+        {!token ? (
+          <EmptyState
+            title="Sign in to see documents"
+            description="Use the bootstrap admin account to generate docs and open the document workspace."
+            action={
+              <Link to="/login" className="df-btn-primary">
+                Go to login
+              </Link>
+            }
+          />
+        ) : docs.isLoading ? (
+          <LoadingState label="Loading documents…" rows={4} />
+        ) : docs.isError ? (
+          <EmptyState
+            title="Could not load documents"
+            description={(docs.error as Error).message}
+          />
+        ) : !docs.data?.length ? (
+          <EmptyState
+            title="No documents yet"
+            description="Generate from a repository, then open the result in the document editor."
+            action={
+              <Link to="/generate" className="df-btn-primary">
+                Generate document
+              </Link>
+            }
+          />
+        ) : (
+          <div className="df-panel overflow-x-auto animate-fade-in">
+            <table className="df-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Template</th>
+                  <th>Revision</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {docs.data.map((doc) => (
+                  <tr key={doc.id}>
+                    <td>
+                      <Link className="font-medium text-accent underline-offset-2 hover:underline" to={`/documents/${doc.id}`}>
+                        {doc.title}
+                      </Link>
+                    </td>
+                    <td className="font-mono text-xs text-muted">{doc.template_slug}</td>
+                    <td className="tabular-nums">r{doc.current_revision}</td>
+                    <td className="text-muted">{new Date(doc.updated_at).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div className="rounded-lg border border-border bg-surface/70 p-4">
-            <dt className="font-mono text-xs uppercase tracking-wider text-muted">Session</dt>
-            <dd className="mt-2 text-lg font-medium">
-              {token ? (me.data ? me.data.email : me.isError ? "Expired" : "Loading…") : "Signed out"}
-            </dd>
-          </div>
-        </dl>
-        <div className="flex flex-wrap gap-3">
-          {!token ? (
-            <Link to="/login" className="inline-flex rounded-md bg-accent px-4 py-2.5 font-medium text-white dark:text-canvas">
-              Go to login
-            </Link>
-          ) : (
-            <Link to="/generate" className="inline-flex rounded-md bg-accent px-4 py-2.5 font-medium text-white dark:text-canvas">
-              Generate document
-            </Link>
-          )}
-        </div>
-      </section>
+        )}
+      </div>
     </AppShell>
   );
 }

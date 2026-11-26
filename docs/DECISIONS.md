@@ -95,3 +95,59 @@ Recorded defaults for the foundation scaffold. Change only with an explicit foll
 ## AD-016 — Prompt injection + secret egress
 
 **Decision:** Redact common secrets before analysis excerpts leave the sandbox. Wrap untrusted repo blobs in `<<<DOCForge_REPO_DATA_BEGIN/END>>>` delimiters with an explicit system guard that ignores instructions inside the block.
+
+## AD-017 — Document store for corrections (in-memory + Alembic)
+
+**Decision:** Phase 2 editable documents live in an in-process `document_store` (same spirit as Phase 1 `job_store`) for CI/dev. Alembic `0003_phase2_corrections` adds Postgres columns for locks, citations, pending suggestions, and provenance (`source_job_id`, `pinned_commit_sha`, template seal).
+
+**Why:** Unblocks section APIs and tests without requiring live Postgres in unit CI; DB schema stays aligned for compose.
+
+**Revisit when:** Persist live documents to Postgres/MinIO and drop the in-memory registry.
+
+## AD-018 — Section-only mutations
+
+**Decision:** Regenerate, manual edit, and accept-suggestion mutate exactly one `section_id`’s content JSON. Sibling sections must remain byte-identical (canonical JSON). Locked sections refuse mutation and are skipped by regenerate-all.
+
+**Why:** Core Phase 2 product invariant alongside template immutability.
+
+## AD-019 — Suggestion mode is non-destructive until accept
+
+**Decision:** `POST .../suggest` stores `pending_suggestion` on the section without creating a content revision. Accept applies proposed content and appends a revision; reject clears the pending payload.
+
+## AD-020 — Versions are full section snapshots
+
+**Decision:** Every successful content/lock mutation appends a `DocumentRevision` with a full per-section snapshot (content, lock, citations, pending suggestion). Diff compares two revision numbers; undo restores `current−1`; restore reapplies a chosen revision then appends a new revision.
+
+## AD-021 — Citations on section content
+
+**Decision:** Citations are content-only fields (`file`, `line`, `end_line`, `commit_sha`, `symbol`) attached when materializing/regenerating from analysis symbols at the document’s pinned commit. They travel in `content_json.citations` and the section `citations` API field. They never alter template structure.
+
+## AD-022 — DocGenProvider interface (model | agent)
+
+**Decision:** Phase 3 introduces `DocGenProvider` in `apps/api/app/ai/` with `kind: model | agent`, `complete`, `list_models`, `test_connection`, and `cancel`. Repo git providers remain under `app/providers/`.
+
+**Why:** One generation contract for Ollama-compatible defaults, optional paid HTTP adapters, and the Cursor CLI agent path without coupling the pipeline to a single SDK.
+
+## AD-023 — HTTP adapters without proprietary SDKs
+
+**Decision:** Model adapters (OpenAI-compatible/Ollama, OpenAI, Anthropic, Azure OpenAI, Gemini/Vertex, Bedrock) use `httpx` only. Paid provider keys are optional; the app runs with mock / Ollama without them.
+
+**Why:** Keeps required dependencies OSI-only (AD-007) and avoids commercial SDK coupling.
+
+## AD-024 — Cursor CLI isolation
+
+**Decision:** `cursor_cli` is `kind=agent`. It runs in a throwaway Docker container when Docker is available, injects only `CURSOR_API_KEY`, never passes `--force` (or related force/yes flags), enforces timeouts, and maps exits to normalized errors. Agent kind always skips retrieval.
+
+**Why:** Limits blast radius of an agent tool that can otherwise mutate host state; product policy separates agent from model+RAG paths.
+
+## AD-025 — Envelope encryption for provider secrets
+
+**Decision:** API keys are stored as Fernet envelope blobs (`wrapped_dek` + `ciphertext`) using `APP_SECRETS_KEY` (falls back to `JWT_SECRET` in development). Admin list/detail responses expose `has_api_key` only — never plaintext or ciphertext to the browser.
+
+**Why:** At-rest protection for optional paid keys without a separate KMS in Phase 3.
+
+## AD-026 — Provider routing, fallback, and budgets
+
+**Decision:** `provider_policies` (in-memory store + Alembic `provider_policies` table) holds primary + fallback chain, daily/monthly token budgets, and `allow_paid_providers`. Exhausted budgets raise `policy_blocked`. Generation uses routing via `ProviderLLMClient` when `LLM_PROVIDER` is not mock.
+
+**Normalized errors:** `auth_failed`, `rate_limited`, `timeout`, `invalid_output`, `policy_blocked`, `provider_unavailable`.
