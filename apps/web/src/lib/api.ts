@@ -272,6 +272,48 @@ export type BuiltinTemplate = {
   name?: string | null;
   sha256: string;
   immutable: boolean;
+  tags?: string[];
+  description?: string | null;
+};
+
+export type StudioTemplate = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  tags: string[];
+  status: "draft" | "published" | "deprecated";
+  source: string;
+  current_version_id: string | null;
+  current_version: number | null;
+  sha256: string | null;
+  immutable: boolean;
+  last_test_run_ok: boolean;
+  created_at: string;
+  updated_at: string;
+  spec?: {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    tags?: string[];
+    theme?: Record<string, unknown>;
+    sections: Array<{
+      id: string;
+      title: string;
+      description?: string;
+      instructions?: string;
+      content_schema?: Record<string, unknown>;
+    }>;
+  };
+  version_detail?: Record<string, unknown>;
+};
+
+export type TemplateTestRun = {
+  ok: boolean;
+  job_id: string | null;
+  error: string | null;
+  template: StudioTemplate;
 };
 
 export function listDocuments(token: string): Promise<DocForgeDocument[]> {
@@ -280,6 +322,101 @@ export function listDocuments(token: string): Promise<DocForgeDocument[]> {
 
 export function listBuiltinTemplates(token: string): Promise<{ templates: BuiltinTemplate[] }> {
   return authJson(token, "/templates/builtin");
+}
+
+export function listStudioTemplates(
+  token: string,
+  params?: { tag?: string; status?: string },
+): Promise<{ templates: StudioTemplate[] }> {
+  const q = new URLSearchParams();
+  if (params?.tag) q.set("tag", params.tag);
+  if (params?.status) q.set("status", params.status);
+  const suffix = q.toString() ? `?${q}` : "";
+  return authJson(token, `/admin/templates${suffix}`);
+}
+
+export function getStudioTemplate(token: string, id: string): Promise<StudioTemplate> {
+  return authJson(token, `/admin/templates/${id}`);
+}
+
+export function createStudioTemplate(
+  token: string,
+  body: { name: string; slug?: string; description?: string; tags?: string[] },
+): Promise<StudioTemplate> {
+  return authJson(token, "/admin/templates", { method: "POST", body: JSON.stringify(body) });
+}
+
+export function promptStudioTemplate(
+  token: string,
+  body: { description: string; name?: string },
+): Promise<StudioTemplate> {
+  return authJson(token, "/admin/templates/prompt", { method: "POST", body: JSON.stringify(body) });
+}
+
+export function importDocxTemplate(token: string, file: File, name?: string): Promise<StudioTemplate> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const q = name ? `?name=${encodeURIComponent(name)}` : "";
+  return fetch(`${API_URL}/admin/templates/import-docx${q}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  }).then(async (response) => {
+    if (!response.ok) throw new Error((await response.text()) || "DOCX import failed");
+    return response.json() as Promise<StudioTemplate>;
+  });
+}
+
+export function cloneStudioTemplate(
+  token: string,
+  id: string,
+  name?: string,
+): Promise<StudioTemplate> {
+  return authJson(token, `/admin/templates/${id}/clone`, {
+    method: "POST",
+    body: JSON.stringify({ name: name ?? null }),
+  });
+}
+
+export function putStudioTemplateSpec(
+  token: string,
+  id: string,
+  spec: Record<string, unknown>,
+): Promise<StudioTemplate> {
+  return authJson(token, `/admin/templates/${id}/spec`, {
+    method: "PUT",
+    body: JSON.stringify({ spec }),
+  });
+}
+
+export function putStudioTemplateYaml(
+  token: string,
+  id: string,
+  yaml_text: string,
+): Promise<StudioTemplate> {
+  return authJson(token, `/admin/templates/${id}/spec/yaml`, {
+    method: "POST",
+    body: JSON.stringify({ yaml_text }),
+  });
+}
+
+export function fetchStudioTemplateYaml(token: string, id: string): Promise<{ yaml_text: string }> {
+  return authJson(token, `/admin/templates/${id}/spec/yaml`);
+}
+
+export function publishStudioTemplate(token: string, id: string): Promise<StudioTemplate> {
+  return authJson(token, `/admin/templates/${id}/publish`, { method: "POST" });
+}
+
+export function deprecateStudioTemplate(token: string, id: string): Promise<StudioTemplate> {
+  return authJson(token, `/admin/templates/${id}/deprecate`, { method: "POST" });
+}
+
+export function testRunStudioTemplate(token: string, id: string): Promise<TemplateTestRun> {
+  return authJson(token, `/admin/templates/${id}/test-run`, {
+    method: "POST",
+    body: JSON.stringify({ provider: "fixture", full_name: "docforge/sample", ref: "main" }),
+  });
 }
 
 export function listJobs(token: string): Promise<{ jobs: Job[] }> {

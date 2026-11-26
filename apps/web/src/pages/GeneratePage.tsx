@@ -10,6 +10,7 @@ import {
   API_URL,
   fetchJob,
   jobEventsUrl,
+  listBuiltinTemplates,
   materializeDocument,
   startGenerateJob,
   type DocForgeDocument,
@@ -21,9 +22,16 @@ export function GeneratePage() {
   const [provider, setProvider] = useState("fixture");
   const [fullName, setFullName] = useState("docforge/sample");
   const [ref, setRef] = useState("main");
+  const [templateSlug, setTemplateSlug] = useState("tech-overview");
   const [jobId, setJobId] = useState<string | null>(null);
   const [events, setEvents] = useState<string[]>([]);
   const [documentId, setDocumentId] = useState<string | null>(null);
+
+  const templatesQuery = useQuery({
+    queryKey: ["generate-templates", token],
+    queryFn: () => listBuiltinTemplates(token!),
+    enabled: Boolean(token),
+  });
 
   const jobQuery = useQuery({
     queryKey: ["job", jobId],
@@ -41,7 +49,7 @@ export function GeneratePage() {
         provider,
         full_name: fullName,
         ref,
-        template_slug: "tech-overview",
+        template_slug: templateSlug,
       }),
     onSuccess: (job: Job) => {
       setJobId(job.id);
@@ -120,6 +128,22 @@ export function GeneratePage() {
             <label className="block space-y-1.5 text-sm">
               <span className="text-muted">Ref</span>
               <input className="df-input" value={ref} onChange={(e) => setRef(e.target.value)} />
+            </label>
+            <label className="block space-y-1.5 text-sm">
+              <span className="text-muted">Template</span>
+              <select
+                className="df-input"
+                value={templateSlug}
+                onChange={(e) => setTemplateSlug(e.target.value)}
+              >
+                {(templatesQuery.data?.templates ?? [{ slug: "tech-overview", name: "Technical Overview" }]).map(
+                  (tpl) => (
+                    <option key={tpl.slug} value={tpl.slug}>
+                      {tpl.name ?? tpl.slug}
+                    </option>
+                  ),
+                )}
+              </select>
             </label>
             <button type="submit" disabled={mutation.isPending} className="df-btn-primary">
               {mutation.isPending ? "Starting…" : "Generate document"}

@@ -1,4 +1,4 @@
-# DocForge Architecture (Phase 3)
+# DocForge Architecture (Phase 4)
 
 ```
 ┌─────────┐   JWT/SSE    ┌─────────┐  clone/pin   ┌──────────────────┐
