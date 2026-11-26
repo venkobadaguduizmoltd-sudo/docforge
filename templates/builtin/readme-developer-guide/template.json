@@ -1,0 +1,52 @@
+{
+  "id": "builtin.readme-developer-guide",
+  "name": "README / Developer Guide",
+  "slug": "readme-developer-guide",
+  "description": "Getting started and contributing guide for developers.",
+  "tags": [
+    "builtin",
+    "readme",
+    "developer"
+  ],
+  "theme": {
+    "html": "theme/document.html.j2",
+    "css": "theme/styles.css",
+    "docx": "theme/docx-styles.json"
+  },
+  "assets": {
+    "logo": "theme/logo.svg",
+    "fonts": "theme/fonts.txt"
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "description": "What this project is.",
+      "instructions": "Summarize the project in a few paragraphs."
+    },
+    {
+      "id": "quickstart",
+      "title": "Quick Start",
+      "description": "Minimal path to run.",
+      "instructions": "Steps to clone, install, and run."
+    },
+    {
+      "id": "development",
+      "title": "Development",
+      "description": "Local workflows.",
+      "instructions": "Explain tests, lint, and common tasks."
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "description": "Code layout.",
+      "instructions": "Map important packages and entry points."
+    },
+    {
+      "id": "contributing",
+      "title": "Contributing",
+      "description": "How to contribute.",
+      "instructions": "PR expectations and coding standards."
+    }
+  ]
+}

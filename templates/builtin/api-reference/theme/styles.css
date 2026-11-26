@@ -1,0 +1,5 @@
+/* Theme CSS tokens for HTML preview (also inlined in document.html.j2 for portability). */
+:root {
+  --docforge-accent: #0f766e;
+  --docforge-ink: #16201c;
+}

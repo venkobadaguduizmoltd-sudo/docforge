@@ -1,0 +1,58 @@
+{
+  "id": "builtin.runbook-operations",
+  "name": "Runbook / Operations Guide",
+  "slug": "runbook-operations",
+  "description": "Operate, monitor, and recover the service.",
+  "tags": [
+    "builtin",
+    "operations",
+    "runbook"
+  ],
+  "theme": {
+    "html": "theme/document.html.j2",
+    "css": "theme/styles.css",
+    "docx": "theme/docx-styles.json"
+  },
+  "assets": {
+    "logo": "theme/logo.svg",
+    "fonts": "theme/fonts.txt"
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Service Overview",
+      "description": "What operators own.",
+      "instructions": "Summarize the service and SLOs."
+    },
+    {
+      "id": "deploy",
+      "title": "Deploy and Rollback",
+      "description": "Release procedures.",
+      "instructions": "Document deploy and rollback steps."
+    },
+    {
+      "id": "monitoring",
+      "title": "Monitoring",
+      "description": "Dashboards and alerts.",
+      "instructions": "List key signals and alert routes."
+    },
+    {
+      "id": "incidents",
+      "title": "Incident Response",
+      "description": "Severity and playbooks.",
+      "instructions": "Outline incident process."
+    },
+    {
+      "id": "runbook",
+      "title": "Common Procedures",
+      "description": "Ops checklists.",
+      "instructions": "Provide checklists for common failures."
+    },
+    {
+      "id": "escalation",
+      "title": "Escalation",
+      "description": "Who to call.",
+      "instructions": "Document escalation paths."
+    }
+  ]
+}

@@ -26,6 +26,10 @@ class Template(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Phase 4 — gallery lifecycle
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="draft")
+    tags: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    source: Mapped[str] = mapped_column(String(32), nullable=False, default="studio")
     created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -47,5 +51,9 @@ class TemplateVersion(Base):
     sha256: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     spec_json: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     is_immutable: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="draft")
+    changelog: Mapped[str | None] = mapped_column(Text, nullable=True)
+    assets_meta: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    last_test_run_ok: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

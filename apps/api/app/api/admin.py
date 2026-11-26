@@ -37,8 +37,8 @@ def get_settings_placeholder(
             "suggestion_mode": True,
             "section_locks": True,
             "paid_providers": policy.allow_paid_providers,
-            "template_studio": False,
+            "template_studio": True,
             "ai_providers": True,
         },
-        note="Retention placeholders remain; AI provider routing/budgets live under /admin/providers.",
+        note="Retention placeholders remain; providers and template studio live under /admin.",
     )

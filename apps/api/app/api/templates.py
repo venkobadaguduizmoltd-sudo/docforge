@@ -39,6 +39,8 @@ def list_builtin_templates(_user=Depends(get_current_user)) -> dict:
                         "name": loaded["spec"].get("name"),
                         "sha256": loaded["sha256"],
                         "immutable": True,
+                        "tags": loaded["spec"].get("tags") or ["builtin"],
+                        "description": loaded["spec"].get("description"),
                     }
                 )
     return {"templates": items}
