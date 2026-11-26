@@ -1,0 +1,10 @@
+# DocForge — paths excluded from analysis / LLM prompt blobs
+.env
+.env.*
+*.pem
+*.key
+**/secrets/**
+**/credentials/**
+**/*secret*
+**/id_rsa*
+**/id_ed25519*

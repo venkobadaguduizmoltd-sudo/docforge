@@ -15,6 +15,7 @@ const LINKS: { to: string; label: string; end?: boolean; adminOnly?: boolean }[]
   { to: "/admin", label: "Overview", end: true },
   { to: "/admin/templates", label: "Templates" },
   { to: "/admin/providers", label: "AI Providers" },
+  { to: "/admin/quality", label: "Quality" },
   { to: "/admin/users", label: "Users & roles", adminOnly: true },
   { to: "/admin/jobs", label: "Jobs" },
   { to: "/admin/settings", label: "Settings", adminOnly: true },

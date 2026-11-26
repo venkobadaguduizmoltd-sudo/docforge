@@ -103,6 +103,30 @@ async def run_generate_document(job_id: str, payload: dict[str, Any]) -> dict[st
         )
         content_dict = {sid: section.model_dump() for sid, section in content.items()}
 
+        await publish_progress(job_id, "validating", {})
+        from app.diagrams.model import validate_diagram_model
+        from app.diagrams.render import render_diagram
+        from app.quality.hallucination import validate_document_against_analysis
+        from app.quality.hooks import quality_dashboard_hooks
+
+        hallucination = validate_document_against_analysis(content, analysis)
+        # Soft-fail: record issues; hard-fail only when payload requests strict mode
+        if payload.get("strict_hallucination") and not hallucination.ok:
+            raise RuntimeError(f"Hallucination validation failed: {hallucination.to_dict()}")
+
+        diagram_artifacts: dict[str, Any] = {}
+        diagram_payload = payload.get("diagram")
+        if isinstance(diagram_payload, dict):
+            model = validate_diagram_model(diagram_payload)
+            rendered = render_diagram(model, output_dir / "diagrams")
+            diagram_artifacts = {
+                "id": rendered.model_id,
+                "engine": rendered.engine,
+                "dot": str(output_dir / "diagrams" / f"{rendered.model_id}.dot"),
+                "d2": str(output_dir / "diagrams" / f"{rendered.model_id}.d2"),
+                "svg": str(output_dir / "diagrams" / f"{rendered.model_id}.svg"),
+            }
+
         await publish_progress(job_id, "rendering", {"formats": ["html", "docx", "pdf"]})
         html = render_html(
             template_spec=spec,
@@ -125,6 +149,8 @@ async def run_generate_document(job_id: str, payload: dict[str, Any]) -> dict[st
             expected_sha256=sha256,
         )
 
+        quality_hooks = quality_dashboard_hooks(output_dir)
+
         result = {
             "job_id": job_id,
             "commit_sha": commit_sha,
@@ -139,7 +165,15 @@ async def run_generate_document(job_id: str, payload: dict[str, Any]) -> dict[st
                 "languages": analysis.languages,
                 "symbols": [s.__dict__ for s in analysis.symbols[:50]],
                 "secret_findings_count": analysis.secret_findings_count,
+                "ignored_files": analysis.ignored_files[:50],
+                "extractors": analysis.extractors,
+                "summaries": analysis.summaries,
             },
+            "quality": {
+                "hallucination": hallucination.to_dict(),
+                "hooks": quality_hooks,
+            },
+            "diagrams": diagram_artifacts,
             "artifacts": {
                 "html": str(html_path),
                 "docx": str(docx_path),
