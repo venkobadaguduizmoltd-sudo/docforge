@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  API_URL,
   fetchJob,
   jobEventsUrl,
   materializeDocument,
@@ -14,8 +15,6 @@ import {
   type DocForgeDocument,
   type Job,
 } from "@/lib/api";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 export function GeneratePage() {
   const { token } = useAuth();
